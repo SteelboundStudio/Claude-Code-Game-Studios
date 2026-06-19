@@ -217,15 +217,25 @@ The Polish → Release gate requires this report with no open CRITICAL or HIGH i
 
 Present the report summary (executive summary + CRITICAL/HIGH findings only) in conversation.
 
-Ask: "May I write the full security audit report to `production/security/security-audit-[date].md`?"
+Auto-write the full security audit report to
+`production/security/security-audit-[date].md` — findings are grep-derived and
+classified by the fixed severity rubric, so no approval gate is required.
 
-Write only after approval.
+**Replacement check (report schema):** before declaring the write complete, verify
+the report contains an executive summary, per-severity findings, a dependency
+inventory, and a release recommendation.
 
 ---
 
 ## Phase 7: Gate Integration
 
 This report is a required artifact for the **Polish → Release gate**.
+
+**Gate assertion (objective, auto-blocking):** the release gate fails while any
+open CRITICAL or HIGH finding remains. This is computed from the report, not gated
+on a human ask. The only human turn is accepting a specific risk — which requires
+a logged rationale line in the **Accepted Risk** section (an accepted finding moves
+from Open to Accepted Risk with its rationale; it no longer blocks the gate).
 
 After remediating findings, re-run: `/security-audit quick` to confirm CRITICAL/HIGH items are resolved before running `/gate-check release`.
 

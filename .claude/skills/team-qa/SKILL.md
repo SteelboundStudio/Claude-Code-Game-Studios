@@ -77,22 +77,23 @@ Prompt the qa-lead to:
 
 If the smoke check result is **FAIL**, the qa-lead must list the failures prominently. QA cannot proceed past the strategy phase with a failed smoke check.
 
-Present the qa-lead's full strategy to the user, then use `AskUserQuestion`:
+Present the qa-lead's full strategy. The strategy is objective and auto-resolves —
+no human approval gate (Replacement check: smoke verdict from the report; story
+classification from the Type field; blocked stories listed objectively):
 
-```
-question: "QA Strategy Review"
-options:
-  - "Looks good — proceed to test plan"
-  - "Adjust story types before proceeding"
-  - "Skip blocked stories and proceed with the rest"
-  - "Smoke check failed — fix issues and re-run /team-qa"
-  - "Cancel — resolve blockers first"
-```
-
-If smoke check **FAIL**: do not proceed to Phase 3. Surface the failures from the smoke check report and stop. The user must fix them, re-run `/smoke-check sprint`, and then re-run `/team-qa`.
-If smoke check **UNKNOWN**: surface a warning — "No smoke check report found. Recommend running `/smoke-check sprint` before QA. Proceeding with caution."
-If smoke check **PASS WITH WARNINGS**: note the warnings for the sign-off report and continue.
-If blockers are present: list them explicitly. The user may choose to skip blocked stories or cancel the cycle.
+- **Smoke check FAIL** → auto-block: do not proceed to Phase 3. Surface the failures
+  from the smoke check report and stop. The user must fix them, re-run
+  `/smoke-check sprint`, then re-run `/team-qa`.
+- **Smoke check UNKNOWN** → surface a warning ("No smoke check report found.
+  Recommend running `/smoke-check sprint` before QA. Proceeding with caution.")
+  and continue.
+- **Smoke check PASS WITH WARNINGS** → note the warnings for the sign-off report
+  and continue.
+- **Story-type classification** → taken directly from each story's `Type:` field
+  (objective); auto-applied.
+- **Blocked stories** → default to **skip-with-log**: list them objectively in the
+  report and proceed with the rest. (No human pause; the skip is logged in the
+  sign-off report's Out of Scope section.)
 
 ### Phase 3: Test Plan Generation
 
@@ -107,9 +108,9 @@ The test plan should cover:
 - **Entry Criteria**: what must be true before QA can begin. Always include: (1) Smoke check PASS or PASS WITH WARNINGS report exists at `production/qa/smoke-*.md`, (2) build is stable (no crashes on launch), (3) all Must Have stories have Status: in-progress or done in `production/sprint-status.yaml`. Add any sprint-specific criteria beyond these.
 - **Exit Criteria**: what constitutes a completed QA cycle (all stories PASS or FAIL with bugs filed)
 
-Ask: "May I write the QA plan to `production/qa/qa-plan-[sprint]-[date].md`?"
-
-Write only after receiving approval.
+Auto-write the QA plan to `production/qa/qa-plan-[sprint]-[date].md` — the plan is
+computed from the strategy and story Type fields, so no approval gate is required.
+(Replacement check: entry and exit criteria are present in the written plan.)
 
 ### Phase 4: Test Case Writing (qa-tester)
 
@@ -144,7 +145,18 @@ options:
 
 ### Phase 5: Manual QA Execution
 
-Walk through each story in the approved manual QA list.
+> **Owner decision — KEEP human observation gate (for now), auto-block the
+> automatable portions.** For **Logic** and **Integration** stories, the automated
+> unit/integration test results are objective and **auto-block** the Phase 6
+> verdict on failure — they do not need a human observation pass. For genuinely
+> **Visual/Feel** and **UI** stories, keep the human observation gate below: no
+> e2e/integration harness exists yet to replace a human observing the running game.
+> **When scripted e2e/integration tests for these stories become available, convert
+> the observation gate to automated results and remove the human turn.** (Replacement
+> check: automated test results for Logic/Integration; observation gate only for
+> genuinely visual stories.)
+
+Walk through each remaining Visual/Feel and UI story in the approved manual QA list.
 
 Batch stories into groups of 3-4 and use `AskUserQuestion` for each:
 
@@ -206,9 +218,13 @@ Next step guidance by verdict:
 - APPROVED WITH CONDITIONS: "Resolve conditions before advancing. S3/S4 bugs may be deferred to polish."
 - NOT APPROVED: "Resolve S1/S2 bugs and re-run `/team-qa` or targeted manual QA before advancing."
 
-Ask: "May I write this QA sign-off report to `production/qa/qa-signoff-[sprint]-[date].md`?"
+The verdict is computed by the bug-severity rule table above (any open S1/S2 →
+NOT APPROVED) — it is objective and emitted without a human gate.
 
-Write only after receiving approval.
+Auto-write the QA sign-off report to `production/qa/qa-signoff-[sprint]-[date].md` —
+the verdict is computed from bug severities, so no approval gate is required.
+(Replacement check: the sign-off verdict is computed from the open bug-severity
+rule table.)
 
 ## Error Recovery Protocol
 

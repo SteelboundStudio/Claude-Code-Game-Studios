@@ -253,12 +253,16 @@ Difficulty arc: [appropriate / too easy throughout / difficulty spike at T+N]
 
 ## 6. Write Output
 
-Present the protocol summary in conversation, then ask:
+Present the protocol summary in conversation, then auto-write the soak test
+protocol to `production/qa/soak-test-[date]-[duration].md` — the protocol document
+is generated deterministically (checkpoints derived from the duration argument),
+so no approval gate is required. (The PASS/CONCERNS/FAIL verdict and Sign-Off
+inside the document remain the human tester's call — this skill only generates the
+protocol; humans run it.)
 
-"May I write this soak test protocol to
-`production/qa/soak-test-[date]-[duration].md`?"
-
-Write only after approval.
+**Replacement check (protocol schema):** before declaring the write complete, verify
+the document contains the Pre-Session Setup, all timed checkpoints for the chosen
+duration, and the Post-Session Analysis sections.
 
 After writing:
 
@@ -281,4 +285,5 @@ If the verdict is FAIL, run `/smoke-check` again after fixing the issues."
   doesn't need a 4h soak; a city-builder might. Use judgment and ask if unclear.
 - **First soak should be `all` focus** — narrow focus (memory-only) is for
   regression soaks after a specific fix, not the first pass
-- **Ask before writing** — always confirm before creating the protocol file
+- **Auto-write the protocol** — the protocol document is generated; write it
+  without an approval gate. The verdict and sign-off inside it stay human.

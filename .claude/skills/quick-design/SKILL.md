@@ -46,8 +46,16 @@ and redirect to `/design-system` instead.
 
 If there is no argument, ask the user to describe the change (plain text prompt), then classify it using the criteria above.
 
-Present the inferred classification using `AskUserQuestion`:
-- Prompt: "I've classified this as **[inferred type]** — [brief reason]. Is that correct?"
+Auto-infer the classification from keywords and the size estimate, and proceed
+with the inferred type without prompting. (Replacement check — objective redirect
+rule: if the estimate exceeds one week, or the change introduces a new
+cross-system system, auto-redirect to `/design-system` and stop with verdict
+**REDIRECTED**.)
+
+Only prompt the user when the size estimate straddles the redirect boundary
+(roughly the ~4-hour / 1-week threshold) and the type cannot be resolved
+confidently. In that ambiguous case, use `AskUserQuestion`:
+- Prompt: "I've classified this as **[inferred type]** — [brief reason], but it's near the redirect boundary. Is that correct?"
 - Options:
   - `[A] Yes — [inferred type] is correct`
   - `[B] Tuning — changing numbers or balance values only`

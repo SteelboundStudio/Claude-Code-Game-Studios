@@ -9,7 +9,10 @@ model: sonnet
 
 ## Phase 1: Understand the Task
 
-Read the task description from the argument. If the description is too vague to estimate meaningfully, ask for clarification before proceeding.
+Read the task description from the argument. If the description is too vague to estimate
+precisely, do not pause — produce the estimate anyway with an explicit **Low** confidence
+band and state the assumptions used (complexity/velocity heuristic). Flag the vagueness
+as the primary confidence driver rather than asking for clarification.
 
 Read CLAUDE.md for project context: tech stack, coding standards, architectural patterns, and any estimation guidelines.
 

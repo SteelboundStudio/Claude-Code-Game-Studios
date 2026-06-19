@@ -91,7 +91,8 @@ Delegate to **sound-designer**:
 - Output: audio polish list and mixing notes
 
 ### Phase 5: Hardening
-Delegate to **qa-tester**:
+Delegate to **qa-tester** (objective verification — profiling, regression, and soak
+metrics are measurable; run without a human gate):
 - Test all edge cases: boundary conditions, rapid inputs, unusual sequences
 - Soak test: run the feature for extended periods checking for degradation
 - Stress test: maximum entities, worst-case scenarios
@@ -99,11 +100,22 @@ Delegate to **qa-tester**:
 - Test on minimum spec hardware (if available)
 - Output: test results with any remaining issues
 
+(Phases 1, 2, and 5 are objective measurement — frame budget, memory ceiling,
+leak detection, regression pass — and feed the Phase 6 auto-asserted portion.)
+
 ### Phase 6: Sign-off
 - Collect results from all team members
 - Compare performance metrics against budgets
 - Report: READY FOR RELEASE / NEEDS MORE WORK
 - List any remaining issues with severity and recommendations
+
+**Split the sign-off (objective auto, feel human):** the perf-metrics-vs-budget
+and regression/soak results are objective and auto-asserted — if frame budget,
+memory ceiling, leak-detection, or regression thresholds are not met, the report
+auto-reflects NEEDS MORE WORK on those grounds without a human gate. (Replacement
+check: frame budget + memory ceiling + leak detection + regression pass thresholds.)
+The **visual juice / feel** polish acceptance (Phases 3–4) remains a human taste
+judgment and stays in the sign-off as the human portion.
 
 ## Error Recovery Protocol
 

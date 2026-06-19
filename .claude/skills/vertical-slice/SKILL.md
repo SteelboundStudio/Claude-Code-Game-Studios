@@ -79,7 +79,12 @@ Both parts matter: player experience AND build feasibility.
 creep in the pre-production phase. Features feel "almost there" and it's tempting
 to add "just one more system." Resist this. Cut, do not extend.
 
-Present scope to the user before building and get confirmation.
+**Scope bounds are objective — auto-propose a scope that satisfies them** (≤5-minute
+playthrough, all core-loop systems included, ≤3-week estimate) without waiting for
+the user to define it. (Replacement check: scope bounds asserted — ≤5 min
+playthrough, all core-loop systems included, ≤3 wk estimate.) The **final scope cut
+decision is creative and stays human**: present the auto-proposed scope and get the
+user's confirmation before building.
 
 ---
 
@@ -105,10 +110,10 @@ multi-week Engine builds will span many sessions.
 
 ## Phase 4: Implement
 
-Ask: "May I create the vertical slice directory at
-`prototypes/[concept-name]-vertical-slice/` and begin implementation?"
-
-If yes, create the directory. Every file must begin with:
+Auto-create the vertical slice directory at
+`prototypes/[concept-name]-vertical-slice/` and begin implementation — directory
+creation is mechanical (the scope was already confirmed in Phases 2–3), so no
+separate approval gate is required. Every file must begin with:
 
 ```
 // VERTICAL SLICE - NOT FOR PRODUCTION
@@ -244,10 +249,14 @@ text with real observations.
 - What would we change about the slice scope if we ran this again?
 ```
 
-Ask: "May I write this report to
-`prototypes/[concept-name]-vertical-slice/REPORT.md`?"
+Auto-write this report to `prototypes/[concept-name]-vertical-slice/REPORT.md` — the
+report is mechanical assembly of observations captured in Phase 5 and the velocity
+log, so no approval gate is required. (Replacement check: slice files carry the
+NOT-FOR-PRODUCTION banner; the report has all sections including the velocity log.)
+The PROCEED/PIVOT/KILL verdict written into the report remains the human's call
+collected in Phase 5 — only the file write is automated.
 
-If yes, write the file. Then update `prototypes/index.md` (create if it does not
+Then update `prototypes/index.md` (create if it does not
 exist) — append one row to the vertical slice table: concept name, date, verdict,
 and a link to the REPORT.md. Note whether this was a first-run slice or a re-run
 after a PIVOT. The velocity log in this report is some of the most valuable data in

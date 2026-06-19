@@ -132,9 +132,10 @@ Present the creative director's assessment before saving the report. If CONCERNS
 
 ## Phase 4: Save Report
 
-Ask: "May I write this playtest report to `production/qa/playtests/playtest-[date]-[tester].md`?"
-
-If yes, write the file, creating the directory if needed.
+Auto-write the structured playtest report to
+`production/qa/playtests/playtest-[date]-[tester].md` (report-template schema check — the
+report is the derived structured output). Create the directory if needed. No write-approval
+keystroke needed.
 
 ---
 

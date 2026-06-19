@@ -118,12 +118,11 @@ Post-Cutoff Versions: [list]
 - [GDD system name] → [domain] → [risk level]
 ```
 
-Use `AskUserQuestion`:
-- Prompt: "One or more engine domains are HIGH RISK — the LLM's knowledge may be unreliable for these areas. Architectural recommendations in these domains should be cross-referenced with the engine docs before being acted on. How would you like to proceed?"
-- Options:
-  - `[A] Proceed — flag HIGH RISK domains throughout the output`
-  - `[B] Let me check the engine reference first — pause here`
-  - `[C] Show me which domains are HIGH RISK and why`
+Auto-flag the HIGH-RISK domains throughout the output and proceed (engine-version
+risk-table lookup — the skill already flags these domains inline in every phase). No
+pause needed: emit the list of HIGH-RISK domains and the note that recommendations in
+those domains must be cross-referenced against the engine docs before being acted on,
+then continue to Phase 1.
 
 ---
 
@@ -288,14 +287,13 @@ but don't yet. Group by priority:
 
 ## Phase 7: Write the Master Architecture Document
 
-Once all sections are approved, write the complete document to
-`docs/architecture/architecture.md`.
+Each section was already approved per-section in Phases 1–4 (the creative/judgment gates).
+The final assembly write is mechanical — auto-write the complete document to
+`docs/architecture/architecture.md` (required-section presence check). No final
+write-approval keystroke needed.
 
-Display a one-paragraph summary of what the document will contain (layers, modules, data flows, ADR gaps). Then use `AskUserQuestion`:
-- "All sections approved. May I write the master architecture document?"
-  - [A] Yes — write to `docs/architecture/architecture.md` now
-  - [B] Show me the full draft inline first, then ask again
-  - [C] Not yet — I have more changes to discuss
+Display a one-paragraph summary of what the document contains (layers, modules, data
+flows, ADR gaps), then write the file.
 
 The document structure:
 
@@ -372,10 +370,10 @@ Update the Document Status section:
 - Lead Programmer Feasibility: FEASIBLE / CONCERNS ACCEPTED / REVISED
 ```
 
-Show the proposed Document Status block inline, then use `AskUserQuestion`:
-- "May I update the Document Status section with the sign-off results?"
-  - [A] Yes — apply to `docs/architecture/architecture.md`
-  - [B] Not yet — I want to revisit the concerns first
+Once the user has accepted the sign-off in Step 3 (the feasibility-judgment gate above),
+recording the verdict in the Document Status section is a mechanical write — auto-apply
+the Document Status block to `docs/architecture/architecture.md` (file-write check). No
+separate write-approval keystroke needed.
 
 ---
 
@@ -446,10 +444,10 @@ This skill follows the collaborative design principle at every phase:
 3. **Ask before deciding** — present options for each architectural choice
 4. **Draft before approval** — show the content inline before asking to write it.
    Never ask approval for a section the user has not yet seen.
-5. **Use `AskUserQuestion` for write approvals** — plain text "May I?" is not
-   sufficient. Use the structured tool with labeled options [A]/[B]/[C] (write now /
-   show full draft first / not yet). For multi-file changesets, list every file
-   and what changes, then ask once grouped — not separate plain-text asks per file.
+5. **Per-section creative approval stays; final assembly write is automatic** — each
+   architectural section (layer map, ownership, data flow, API boundaries) is still
+   approved per-section. Once all sections are approved, the master-document assembly
+   write is mechanical and happens automatically (required-section presence check).
 6. **Incremental writing** — write each approved section immediately; do not
    accumulate everything and write at the end. This survives session crashes.
 

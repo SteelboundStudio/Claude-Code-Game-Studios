@@ -41,22 +41,28 @@ Examples:
 /architecture-decision --review solo     → skips all gates this run
 ```
 
+> **Review mode applies ONLY to JUDGMENT/CREATIVE gates.** VERIFICATION-class gates (see Gate
+> Classes below) always run and auto-block on objective failure, in every mode — they are never
+> skipped. Review mode tunes *human creative oversight*, not whether objective checks run.
+
 | Mode | What runs | Best for |
 |------|-----------|----------|
-| `full` | All gates active — every workflow step reviewed | Teams, learning users, or when you want thorough director feedback at every step |
-| `lean` | PHASE-GATEs only (`/gate-check`) — per-skill gates skipped | **Default** — solo devs and small teams; directors review at milestones only |
-| `solo` | No director gates anywhere | Game jams, prototypes, maximum speed |
+| `full` | All gates active — every JUDGMENT/CREATIVE step gets human review; all VERIFICATION gates run | Teams, learning users, thorough creative feedback at every step |
+| `lean` | JUDGMENT/CREATIVE per-skill gates skipped (PHASE-GATEs still run); **all VERIFICATION gates still run and auto-block** | **Default** — solo devs and small teams; humans review creative at milestones, machines verify everything always |
+| `solo` | No JUDGMENT/CREATIVE gates surface to a human; **all VERIFICATION gates still run and auto-block** | Game jams, prototypes, maximum speed — but objective checks are never dropped |
 
 **Check pattern — apply before every gate spawn:**
 
 ```
 Before spawning gate [GATE-ID]:
-1. If skill was called with --review [mode], use that
+0. If [GATE-ID] is a VERIFICATION-class gate → ALWAYS run it (ignore review mode);
+   handle its verdict via the orchestrator (auto-block on REJECT, auto-proceed+log on CONCERNS).
+1. Else (JUDGMENT/CREATIVE): if skill was called with --review [mode], use that
 2. Else read production/review-mode.txt
 3. Else default to lean
 
-Apply the resolved mode:
-- solo → skip all gates. Note: "[GATE-ID] skipped — Solo mode"
+Apply the resolved mode (JUDGMENT/CREATIVE gates only):
+- solo → skip human surfacing. Note: "[GATE-ID] skipped — Solo mode"
 - lean → skip unless this is a PHASE-GATE (CD-PHASE-GATE, TD-PHASE-GATE, PR-PHASE-GATE, AD-PHASE-GATE)
          Note: "[GATE-ID] skipped — Lean mode"
 - full → spawn as normal
@@ -94,18 +100,42 @@ waiting for any result. Collect all verdicts before proceeding.
 
 ---
 
+## Gate Classes (verdict handling depends on the class)
+
+Every gate is one of two classes. **The class decides who handles the verdict — a human or the
+orchestrator.** This is how the studio stays autonomous on technical work without dropping verification.
+
+| Class | Gate prefixes / IDs | Verdict owner |
+|-------|---------------------|---------------|
+| **VERIFICATION** (objective pass/fail — soundness, coverage, feasibility, engine-risk) | `TD-ADR`, `TD-ENGINE-RISK`, `TD-ARCHITECTURE`, `TD-SYSTEM-BOUNDARY`, `LP-FEASIBILITY`, `LP-CODE-REVIEW` (objective findings), `QL-STORY-READY`, `QL-TEST-COVERAGE` | **Orchestrator** — auto-handled, no human turn |
+| **JUDGMENT / CREATIVE** (taste, vision, scope risk, fun, fairness) | all `CD-*`, all `AD-*`, `ND-CONSISTENCY`, `PR-SCOPE`, `PR-MILESTONE`, all `*-PHASE-GATE`, and the design-intent half of `LP-CODE-REVIEW` | **Human** — surfaced for the call |
+| **HYBRID** (objective math + scope judgment) | `PR-SPRINT`, `PR-EPIC` | Split: objective overflow auto-handled; scope judgment to human |
+
+> **Verification gates are mode-independent.** They are NOT skipped by `lean`/`solo` — skipping a
+> verification gate is dropping verification, which is forbidden. Only JUDGMENT/CREATIVE gates are
+> gated by review mode. (Review mode controls *how much human creative review* happens, never whether
+> objective checks run.)
+
+---
+
 ## Standard Verdict Format
 
-All gates return one of three verdicts. Skills must handle all three:
+All gates return one of three verdicts. Handling depends on the gate's **class** (above):
 
-| Verdict | Meaning | Default action |
-|---------|---------|----------------|
-| **APPROVE / READY** | No issues. Proceed. | Continue the workflow |
-| **CONCERNS [list]** | Issues present but not blocking. | Surface to user via `AskUserQuestion` — options: `Revise flagged items` / `Accept and proceed` / `Discuss further` |
-| **REJECT / NOT READY [blockers]** | Blocking issues. Do not proceed. | Surface blockers to user. Do not write files or advance stage until resolved. |
+| Verdict | VERIFICATION class (orchestrator handles) | JUDGMENT/CREATIVE class (human handles) |
+|---------|-------------------------------------------|------------------------------------------|
+| **APPROVE / READY** | Proceed automatically. | Proceed. |
+| **CONCERNS [list]** | **Auto-proceed with a logged rationale** — record the concern + why it's non-blocking in the gate-outcome log; do **not** pause for a human. | Surface to user via `AskUserQuestion` — `Revise flagged items` / `Accept and proceed` / `Discuss further`. |
+| **REJECT / NOT READY [blockers]** | **Auto-block** — do not write files or advance until the objective blocker is fixed (no human approval needed to *enforce* the block; the fix is technical). | Surface blockers to user; do not advance until resolved. |
 
-**Escalation rule**: When multiple directors are spawned in parallel, apply the
-strictest verdict — one NOT READY overrides all READY verdicts.
+**Logged-rationale format** (VERIFICATION CONCERNS auto-proceed): append to the gate-outcome log
+```
+> [GATE-ID] CONCERNS auto-accepted [date]: <concern> — non-blocking because <objective reason>
+```
+
+**Escalation rule**: When multiple directors are spawned in parallel, apply the strictest verdict —
+one REJECT/NOT READY overrides all APPROVE. If the parallel set mixes classes, each verdict is handled
+by its own class's rule (a VERIFICATION REJECT auto-blocks; a CREATIVE REJECT surfaces to the human).
 
 ---
 

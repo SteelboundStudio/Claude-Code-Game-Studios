@@ -21,14 +21,13 @@ Before loading any data, glob for an existing retrospective file:
   (also check `production/sprints/sprint-[N]-retrospective.md` as an alternate location)
 - For milestone retrospectives: `production/retrospectives/retro-[milestone-name]-*.md`
 
-If a matching file is found, use `AskUserQuestion`:
-- Prompt: "An existing retrospective was found: [filename]. How do you want to proceed?"
-- Options:
-  - `[A] Update existing — load it and add/revise sections with new data`
-  - `[B] Start fresh — generate a new retrospective (archive the old one)`
-
-If [A]: read the existing file and carry its content forward, revising sections with new data.
-If [B]: continue to Phase 2 with a blank slate. Before writing the new file, rename the existing one with a `-archived-[date]` suffix.
+If a matching file is found, resolve the choice deterministically without
+prompting: if the existing retrospective file is newer than the last sprint close,
+**update** it (load it and carry its content forward, revising sections with new
+data); otherwise **start fresh** — first rename the existing one with a
+`-archived-[date]` suffix, then continue to Phase 2 with a blank slate.
+(Replacement check: idempotent — the archive rename must be verified complete
+before any new write.)
 
 ---
 
@@ -41,19 +40,22 @@ Read the sprint or milestone plan from the appropriate location:
 
 **Also check for `production/sprint-status.yaml`**: if it exists, read it alongside the sprint plan. It is the authoritative source for actual story completion status (status: done, completed dates, blockers). Use it as the primary source for completion metrics in Phase 3. Fall back to markdown scanning only if the yaml does not exist. Note discrepancies between the yaml and the sprint plan (e.g., stories in yaml not in plan, or vice versa).
 
-**If the file does not exist or is empty**, output:
+**Data-presence assertion**: if neither a sprint/milestone plan nor
+`production/sprint-status.yaml` exists (no recoverable data at all), auto-BLOCK
+with a clear message and stop — do not prompt:
 
-> "No sprint data found for [sprint/milestone]. Run `/sprint-status` to generate
-> sprint data first, or provide the sprint details manually."
+> "No sprint data found for [sprint/milestone] and no `sprint-status.yaml` exists.
+> Run `/sprint-status` to generate sprint data first. Verdict: **BLOCKED** — no
+> sprint data available."
 
-Then use `AskUserQuestion` to present two options:
+Only when partial data is recoverable (e.g., a plan exists but is incomplete, or
+the yaml is present but lacks completion fields) prompt the user to supplement it
+via `AskUserQuestion`:
 
-- **[A] Provide data manually** — ask the user to paste or describe the sprint
-  tasks, dates, and outcomes; use that as the source of truth for the retrospective.
-- **[B] Stop** — abort the skill. Verdict: **BLOCKED** — no sprint data available.
-
-If the user chooses [A], collect the data and continue to Phase 3 using what they provide.
-If the user chooses [B], stop here.
+- **[A] Provide the missing data manually** — ask the user to paste or describe the
+  missing sprint tasks, dates, and outcomes; merge it with the recovered data.
+- **[B] Proceed with partial data** — continue to Phase 3 using only what was
+  recovered, noting the gaps in the report.
 
 Extract: planned tasks, estimated effort, owners, and goals.
 
@@ -191,23 +193,25 @@ the single most important thing to change going forward?]
 
 Present the retrospective and top findings to the user (completion rate, velocity trend, top blocker, most important action item).
 
-Ask: "May I write this to `production/retrospectives/retro-sprint-[N]-[date].md`?" (or `production/retrospectives/retro-[milestone-name]-[date].md` for milestone retrospectives)
+Auto-write the retrospective to `production/retrospectives/retro-sprint-[N]-[date].md`
+(or `production/retrospectives/retro-[milestone-name]-[date].md` for milestone
+retrospectives), creating the `production/retrospectives/` directory if needed —
+the report is derived from git log + sprint-status.yaml + prior retros, so no
+approval gate is required.
 
-If yes, write the file, creating the `production/retrospectives/` directory if needed. Verdict: **COMPLETE** — retrospective saved.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+**Replacement check (metrics-completeness):** before declaring the write complete,
+verify the velocity table and action items are populated from real data, not
+placeholders. Verdict: **COMPLETE** — retrospective saved.
 
 ---
 
 ## Phase 6: Next Steps
 
-Use `AskUserQuestion`:
-- Prompt: "Retrospective complete. The action items and velocity data are ready. Would you like to start sprint planning now with this data pre-loaded?"
-- Options:
-  - `[A] Yes — open sprint planning with retro action items and velocity delta pre-populated`
-  - `[B] No — I'll reference the retrospective file manually when I'm ready`
+Print the next step rather than prompting (pure handoff — no state risk):
 
-If the user selects [A]: Proceed to invoke `/sprint-plan new`, passing the retrospective file path and a summary of the action items and velocity change so the sprint planner can reference them.
+> "Retrospective complete. The action items and velocity data are ready. To start
+> sprint planning with this data pre-loaded, run `/sprint-plan new` — it can
+> reference the retrospective file path, action items, and velocity delta."
 
 - If this was a milestone retrospective, run `/gate-check` to formally assess readiness for the next phase.
 

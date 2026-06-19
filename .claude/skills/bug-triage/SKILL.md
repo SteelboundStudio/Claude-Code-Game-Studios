@@ -215,11 +215,10 @@ After classifying all bugs, generate trend metrics:
 
 ## 6. Write and Gate
 
-Present the report in conversation, then ask:
-
-"May I write this triage report to `production/qa/bug-triage-[date].md`?"
-
-Write only after approval.
+Present the report in conversation, then auto-write it to
+`production/qa/bug-triage-[date].md` (priority-matrix rule validation: priority × severity
+is rule-based, so the report is derived output and the write is mechanical). No write
+approval needed.
 
 After writing:
 - If any S1 bugs are unassigned: "S1 bugs must be assigned before the sprint
@@ -227,8 +226,6 @@ After writing:
 - If regression bugs exist: "Regressions found — consider re-opening the
   affected stories in sprint tracking and running `/smoke-check` to re-gate."
 - If no P1 bugs exist: "No P1 bugs — build is in good shape for QA hand-off." Verdict: **COMPLETE** — triage report written.
-
-If user declined write: Verdict: **BLOCKED** — user declined write.
 
 ---
 

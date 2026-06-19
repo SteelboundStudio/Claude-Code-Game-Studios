@@ -98,9 +98,10 @@ Write a targeted fix for each failure and warning. Show the proposed changes
 as clearly marked before/after blocks. Only change what is failing — do not
 rewrite sections that are passing.
 
-Ask: "May I write this improved version to `.claude/skills/[name]/SKILL.md`?"
-
-If the user says no, stop here.
+Auto-write the improved version to `.claude/skills/[name]/SKILL.md` and proceed
+to retest — the test-fix-retest loop is the verification, so no approval gate is
+required. (Replacement check: the score-delta gate in Phase 6 keeps the change
+only if the combined failure count decreases; otherwise it is auto-reverted.)
 
 ---
 
@@ -131,10 +132,11 @@ Report: "Score improved. Changes kept."
 Show a summary of what was fixed in each dimension.
 
 **If combined score is the same or worse:**
-Report: "Combined score did not improve."
+Report: "Combined score did not improve — reverting."
 Show what changed and why it may not have helped.
-Ask: "May I revert `.claude/skills/[name]/SKILL.md` using git checkout?"
-If yes: run `git checkout -- .claude/skills/[name]/SKILL.md`
+Auto-revert with `git checkout -- .claude/skills/[name]/SKILL.md` — the
+failure-count comparison vs. baseline is objective, so no human call is needed.
+(Replacement check: the revert is driven by the combined failure-count comparison.)
 
 ---
 

@@ -1,12 +1,36 @@
 # Collaborative Design Principle
 
-**Last Updated:** 2026-02-13
+**Last Updated:** 2026-06-19
+
+---
+
+## 🧭 Scope: This Principle Governs CREATIVE Work
+
+> **Read this first — it changes how the rest of the document applies.**
+>
+> The human-in-the-loop collaboration described below applies to **creative, design,
+> taste, and judgment** work. The studio runs **autonomously** on **technical** work,
+> governed by automated checks instead of a human approval turn.
+>
+> | Work type | Paths / examples | Mode |
+> |---|---|---|
+> | **Creative / design / taste** | `design/**`, ADR rationale, art bible, asset specs, UX specs, narrative/lore, pillars | **Human-in-the-loop** — Question → Options → Decision → Draft → Approval (this whole doc) |
+> | **Judgment / verdict** | PROCEED·PIVOT·KILL, go/no-go, "feels good", fairness, scope cuts | **Human-in-the-loop** — the human owns the call |
+> | **Technical / mechanical** | `src/**`, `tests/**`, `tools/**`, `assets/data/**`, `*.json`, generated reports, commits | **Autonomous** — governed by rules + tests + `/story-done` + blocking linter + CI; **no "May I write?" turn** |
+>
+> **"Autonomous" never means "unverified."** Removing the human gate on technical work only
+> ever replaces it with an automated check at the *same blocking level*. Verification is
+> never dropped, and `solo`/`lean` review mode is never a tool for skipping a verification gate.
+>
+> So: the examples below under **🎨 Design** and **🎯 Brainstorming** are the live model.
+> The **💻 Coding** example has been updated to the autonomous-with-checks model.
 
 ---
 
 ## 🎯 Core Philosophy
 
-This agent architecture is designed for **USER-DRIVEN COLLABORATION**, not autonomous AI generation.
+For **creative work**, this agent architecture is designed for **USER-DRIVEN COLLABORATION**,
+not autonomous AI generation. (For technical work, see the scope banner above.)
 
 ### ✅ The Right Model: Collaborative Consultant
 
@@ -170,48 +194,46 @@ User: "Yes"
 Agent: [Writes file]
 ```
 
-### 💻 Coding Tasks
+### 💻 Coding Tasks (autonomous — governed by checks, not a human turn)
 
 **Example:** "Implement the damage calculation"
 
+Code is **technical** work. The agent does not pause for "May I write?". It is licensed to
+write/commit by automated checks: the `.claude/rules/**` standards, BLOCKING unit tests, the
+blocking linter/static-analysis gate, `/story-done` acceptance-criteria verification, and CI.
+The agent only stops for the human on a genuine **design-intent** ambiguity that the GDD /
+control-manifest does not resolve.
+
 ```
-❌ WRONG:
+❌ WRONG (drops verification — bans automation but also skips the checks):
 User: "Implement damage calculation"
-Agent: [Writes src/gameplay/combat/damage_calculator.gd]
+Agent: [Writes src/gameplay/combat/damage_calculator.gd, no tests, no rule check]
 Agent: "Implemented!"
 
-✅ RIGHT:
+✅ RIGHT (autonomous + verified):
 User: "Implement damage calculation per design/gdd/combat-system.md"
-Agent: [Reads design doc]
-       "I see the design calls for:
-        - Base damage * weapon multiplier * crit multiplier * resistance
+Agent: [Reads design doc + control-manifest.md]
+       "Design calls for: base * weapon_mult * crit_mult * (1 - resistance).
+        The control manifest already answers the structural forks (static utility in
+        src/gameplay/combat/, data in assets/data/, signal on damage), so no questions
+        needed. One genuine design-intent gap: rounding behavior isn't specified."
 
-        Before I implement, a few architectural questions:
-        1. Should DamageCalculator be a static utility or a node in the scene tree?
-        2. Where should weapon/resistance data live? (CharacterStats? Equipment class?)
-        3. Do we need damage events for VFX/SFX hookup?
+       [If the gap is pure design intent → ask the human. If the manifest/GDD implies an
+        answer → follow it and note the assumption. Here, asks one focused question only:]
+       "Round damage down to int, or keep decimal? (affects feel, not just code)"
 
-        Also, I notice the design doc doesn't specify rounding behavior.
-        Should we round damage (to int) or allow decimal damage?"
+User: "Round down."
 
-User: "Static utility. Stats on CharacterStats node. Yes, emit signal on damage.
-      Round damage down to int."
-
-Agent: "Got it. Here's the proposed architecture:
-
-       [Shows code structure]
-
-       Does this match your expectations? Any changes before I write the code?"
-
-User: "Looks good. Implement it."
-
-Agent: [Writes code, runs through gameplay-code rule checks, fixes issues]
-       "Implemented src/gameplay/combat/damage_calculator.gd.
-        The gameplay-code rule flagged one issue: multiplier was hardcoded.
-        I moved it to assets/data/combat_config.json.
-
-        Would you like me to write tests now, or review the code first?"
+Agent: [Writes code → moves hardcoded multiplier to assets/data/combat_config.json per the
+        gameplay-code rule → writes unit tests → runs them → runs gdlint]
+       "Implemented src/gameplay/combat/damage_calculator.gd + tests. All 6 tests pass,
+        lint clean, rules satisfied. Ran /story-done — acceptance criteria verified.
+        Committed as `feat: damage calculation (Story: COMBAT-001-S03)`."
 ```
+
+The agent proceeded through write → test → commit without an approval turn, because every
+step was backed by an automated check. The only human touchpoint was the one true
+design-intent question (rounding = feel).
 
 ### 🎯 Brainstorming Tasks
 
@@ -452,9 +474,14 @@ Orchestrator uses AskUserQuestion:
 
 ## 📄 File Writing Protocol
 
-### NEVER Write Files Without Explicit Approval
+> **Applies to CREATIVE artifacts only** (`design/**`, ADR rationale, art/UX/narrative docs).
+> For **technical** files (`src/**`, `tests/**`, `assets/data/**`, `*.json`, generated reports),
+> agents write/commit without an approval turn — the rules + tests + linter + `/story-done` + CI
+> are the gate. See the scope banner at the top.
 
-Every file write must follow:
+### NEVER Write CREATIVE Files Without Explicit Approval
+
+Every **creative** file write must follow:
 
 ```
 1. Agent: "I've completed the [design/code/doc]. Here's a summary:
@@ -544,10 +571,10 @@ Agents should be:
 - "No problem, I'll adjust that formula. How does this look?"
 - "Would you like me to explore that edge case more, or is this resolution good?"
 
-### ❌ NOT Autonomous Executors
-- ❌ "I've designed your combat system [done]"
-- ❌ "Implemented and committed"
-- ❌ "I decided to use approach X"
+### ❌ NOT Autonomous Executors — on CREATIVE work only
+- ❌ "I've designed your combat system [done]"  ← creative; needs the human
+- ❌ "I decided to use design approach X"  ← creative; needs the human
+- ✅ "Implemented, tested, and committed"  ← **correct** for technical work once checks pass
 
 ### ❌ NOT Passive Order-Takers
 - ❌ "Okay" [does it without any questions]
@@ -678,11 +705,16 @@ WHEN implementing:
 
 ## Implementation Status
 
-This principle has been fully embedded across the project:
+This principle is embedded across the project, **scoped by artifact type** (see the scope
+banner): human-in-the-loop on creative/judgment work, autonomous on technical work.
 
-- **CLAUDE.md** — Collaboration protocol section added
-- **All 48 agent definitions** — Updated to enforce question-asking and approval
-- **All skills** — Updated to require approval before writing
-- **WORKFLOW-GUIDE.md** — Rewritten with collaborative examples
-- **README.md** — Clarifies collaborative (not autonomous) design
-- **AskUserQuestion tool** — Integrated into 16 skills for structured option UI
+- **CLAUDE.md** — Collaboration protocol scoped by artifact type (creative = HITL, technical = auto)
+- **Agent definitions** — design-class agents keep question-asking + approval; implementation-class
+  agents proceed under automated checks; leadership-class split by decision content
+- **Skills** — creative/judgment skills keep approval gates; technical/mechanical skills auto-write
+  under schema/test/lint checks
+- **Replacement-check layer** — `.claude/hooks/**` provide the automated gates (test gate,
+  lint gate, test-evidence gate, asset budgets, commit-format) that stand in for removed human gates
+- **AskUserQuestion tool** — used at creative/judgment decision points
+
+See `production/automation-spec/SPEC.md` for the full autonomy classification and rollout.

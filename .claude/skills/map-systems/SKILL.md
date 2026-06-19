@@ -225,17 +225,18 @@ systems index with all data from Phases 2-4:
 - Fill the high-risk systems
 - Fill progress tracker (all systems "Not Started" initially, unless GDDs already exist)
 
-### Step 5b: Approval
+### Step 5b: Write
 
-Present a summary of the document:
+The enumeration (Phase 2), dependencies (Phase 3), and priorities (Phase 4) were all
+approved upstream — those are the creative/judgment gates. Assembling them into the index
+is mechanical, so the write is automatic (systems-index schema check). No final
+write-approval keystroke needed.
+
+Present a summary of the document, then write it to `design/gdd/systems-index.md`:
 - Total systems count by category
 - MVP system count
 - First 3 systems in the design order
 - Any high-risk items
-
-Ask: "May I write the systems index to `design/gdd/systems-index.md`?"
-
-Wait for approval. Write the file only after "yes."
 
 **Review mode check** — apply before spawning CD-SYSTEMS:
 - `solo` → skip. Note: "CD-SYSTEMS skipped — Solo mode." Proceed to Phase 7 next steps.
@@ -257,7 +258,6 @@ After writing, create `production/session-state/active.md` if it does not exist,
 - Next: Design individual system GDDs
 
 **Verdict: COMPLETE** — systems index written to `design/gdd/systems-index.md`.
-If the user declined: **Verdict: BLOCKED** — user did not approve the write.
 
 ---
 
@@ -333,9 +333,10 @@ This skill follows the collaborative design principle at every phase:
    - Phase 2: "Missing systems? Combine or split?"
    - Phase 3: "Dependency ordering correct?"
    - Phase 4: "Priority assignments match your vision?"
-   - Phase 5: "May I write the systems index?"
    - Phase 6: "Start designing, pick different, or stop?" then hand off to `/design-system`
-3. **"May I write to [filepath]?"** before every file write
+3. **Auto-write the systems index** — enumeration, dependencies, and priorities are approved
+   per-phase (the judgment gates); the index assembly write is mechanical and automatic
+   (systems-index schema check)
 4. **Incremental writing**: Update the systems index after each system is designed
 5. **Handoff**: Individual GDD authoring is owned by `/design-system`, which handles
    incremental section writing, cross-referencing, design review, and index updates

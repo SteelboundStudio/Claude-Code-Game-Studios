@@ -71,10 +71,13 @@ tests/
 Estimated time: ~5 minutes to create all files.
 ```
 
-Ask: "May I create these files? I will not overwrite any test files that
-already exist at these paths."
+Auto-create these files — the scaffold is deterministic from the detected engine,
+so no approval gate is required. The no-overwrite guard applies: any test file that
+already exists at a target path is left untouched.
 
-Do not proceed without approval.
+**Replacement check:** engine must be configured (else Phase 1 already stopped and
+redirected to `/setup-engine`); no-overwrite guard enforced; the required `tests/`
+subdirectories and the CI workflow are created.
 
 ---
 
@@ -417,7 +420,8 @@ Verdict: **COMPLETE** — test framework scaffolded and CI/CD wired up.
 
 - **Never overwrite existing test files** — only create files that are missing.
   If a test runner file exists, leave it as-is.
-- **Always ask before creating files** — Phase 2 requires explicit approval.
+- **Auto-scaffold** — the deterministic scaffold is written without an approval
+  gate, guarded by the no-overwrite rule.
 - **Engine detection is non-negotiable** — if the engine is not configured,
   stop and redirect to `/setup-engine`. Do not guess.
 - **`force` flag skips the "already exists" early-exit but never overwrites.**

@@ -82,7 +82,11 @@ Delegate to **narrative-director**:
 ### Phase 5: Polish (parallel)
 Delegate in parallel:
 - **writer**: Final self-review — verify no line exceeds dialogue box constraints, all text uses string keys (not raw strings), placeholder variable names are consistent
-- **localization-lead**: Validate i18n compliance — check string key naming conventions, flag any strings with hardcoded formatting that won't survive translation, verify character limit headroom for languages that expand (German/Finnish typically +30%), confirm no cultural assumptions in text that would need locale-specific variants
+- **localization-lead**: Validate i18n compliance — check string key naming conventions, flag any strings with hardcoded formatting that won't survive translation, verify character limit headroom for languages that expand (German/Finnish typically +30%), confirm no cultural assumptions in text that would need locale-specific variants.
+  **i18n compliance is an objective lint check — run it headlessly, no human gate.**
+  (Replacement check: all strings keyed; length headroom for +30% expansion; no
+  hardcoded format strings.) Violations auto-block the COMPLETE verdict; the story
+  and dialogue *content* remain creative authoring owned by the human.
 - **world-builder**: Finalize canon levels for all new lore entries
 
 ## Error Recovery Protocol

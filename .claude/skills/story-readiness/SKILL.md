@@ -326,6 +326,13 @@ If no sprint file exists or no other ready stories are found, skip this section 
 
 ## Phase 8: Director Gate — Story Readiness Review
 
+The objective readiness checklist (GDD ref present, testable ACs, ADR Accepted,
+estimate present, Type declared, Test-Evidence section present) is computed in
+Phases 3–4 and **emitted as the verdict without any human gate** — that is the
+automatable part. This Phase 8 director gate adds only the human AC-quality
+judgment (is an acceptance criterion *well-written*, not merely present), and is
+skippable in lean/solo. GAPS are surfaced as an objective missing-field list.
+
 Apply the review mode resolved in Phase 0 before spawning QL-STORY-READY:
 
 - `solo` → skip. Note: "QL-STORY-READY skipped — Solo mode." Proceed to close.

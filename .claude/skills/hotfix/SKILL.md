@@ -60,9 +60,9 @@ Status: IN PROGRESS
 [How to revert if the fix causes new issues]
 ```
 
-Ask: "May I write this to `production/hotfixes/hotfix-[date]-[short-name].md`?"
-
-If yes, write the file, creating the directory if needed.
+Auto-write the audit-trail record to `production/hotfixes/hotfix-[date]-[short-name].md`
+(hotfix-record schema check — the record is structured derived output, so the write is
+mechanical). Create the directory if needed. No write-approval keystroke needed.
 
 ---
 
@@ -74,14 +74,10 @@ Check whether this is a git repository:
 
 If this command fails or returns empty: note "Not a git repository — create the branch manually." and skip branch creation.
 
-If the check passes, use `AskUserQuestion` before creating the branch:
-- Prompt: "Ready to create hotfix branch 'hotfix/[short-name]' from [base-ref]?"
-- Options:
-  - `[A] Yes — create branch`
-  - `[B] Use a different base ref — I'll specify it`
-  - `[C] Skip — I'll create the branch myself`
-
-Only run `git checkout -b hotfix/[short-name] [base-ref]` if user selects [A]. If [B]: ask the user for the base ref, then run the command with that ref. If [C]: skip branch creation and proceed to Phase 4.
+If the check passes, auto-create the hotfix branch from the detected base-ref
+(base-ref-valid git check — the release branch, or the current branch if no release
+branch exists, is the objective base). Run `git checkout -b hotfix/[short-name] [base-ref]`
+automatically and report the branch and base-ref used. No branch-creation approval needed.
 
 ---
 
@@ -116,9 +112,10 @@ After approvals, determine the QA scope required before deploying the hotfix. Sp
 
 Ask qa-lead: **Is a full smoke check sufficient, or does this fix require a targeted team-qa pass?**
 
-Apply the verdict:
-- **Smoke check sufficient** — run `/smoke-check` against the hotfix build. If PASS, proceed to Phase 6.
-- **Targeted QA pass required** — run `/team-qa [affected-system]` scoped to the changed system only. If QA returns APPROVED or APPROVED WITH CONDITIONS, proceed to Phase 6.
+Apply the verdict by gating on the automated QA result (smoke-check PASS / team-qa
+APPROVED — computed, no human approval turn):
+- **Smoke check sufficient** — run `/smoke-check` against the hotfix build. If PASS, proceed to Phase 6; if FAIL, block.
+- **Targeted QA pass required** — run `/team-qa [affected-system]` scoped to the changed system only. If QA returns APPROVED or APPROVED WITH CONDITIONS, proceed to Phase 6; otherwise block.
 - **Full QA required** — S1 fixes that touch core systems may require a full `/team-qa sprint`. This delays deployment but prevents a bad patch.
 
 Do not skip this gate. A hotfix that breaks something else is worse than the original bug.

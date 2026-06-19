@@ -37,22 +37,18 @@ Resolve the review mode (once, store for all gate spawns this run):
 **Check for spike mode:** If `--spike` was passed, skip to the **Spike Mode** section
 at the bottom of this skill.
 
-Otherwise, use `AskUserQuestion` to confirm intent before proceeding:
+Otherwise, auto-proceed to prototyping this concept (invocation-context check — when
+`/prototype` is invoked in the normal post-brainstorm flow, prototyping is the intended
+action). No intent-confirmation widget. The two alternative intents remain available as
+explicit opt-outs the user can state:
+- **Skip — concept already proven**: only when the user explicitly says they want to skip.
+  Then ask (plain text): "What evidence do you have that the concept works?" Record the
+  one-line answer and stop. Note: "Concept prototype skipped — evidence: [answer]." Suggest
+  next step: `/map-systems` or `/design-system [mechanic]`.
+- **Mid-production spike**: only when the user explicitly asks for a spike (or passes
+  `--spike`) → skip to the **Spike Mode** section below.
 
-- **Prompt**: "How would you like to use this prototype session?"
-- **Options**:
-  - `Prototype this concept` — build a throwaway build to validate the core idea is fun before writing GDDs (1–3 days)
-  - `Skip — concept already proven` — I have enough evidence this works; log it and proceed directly to design
-  - `Mid-production spike` — I'm already in Production and want to test a specific mechanic or technical question quickly (~4 hours, no phase gate implications)
-
-**If "Skip — concept already proven":**
-Ask (plain text, not a widget): "What evidence do you have that the concept works?"
-Record the one-line answer, then stop. Note: "Concept prototype skipped — evidence:
-[answer]." Suggest next step: `/map-systems` or `/design-system [mechanic]`.
-
-**If "Mid-production spike"**: skip to the **Spike Mode** section below.
-
-**If "Prototype this concept"**: continue with Phase 1 below.
+Otherwise, continue with Phase 1 below.
 
 ---
 
@@ -225,14 +221,18 @@ the player feels something? If it takes more than 3-4 exchanges, the opening is 
 
 ---
 
-Assess which path best fits the hypothesis, then use `AskUserQuestion` with your
-recommendation pre-stated:
+Auto-select the path that best fits the hypothesis (path-fit heuristic — the genre →
+path table above is objective). State the chosen path and the one-sentence reason, then
+proceed to Phase 4. The user can override by naming a different path, but no path-selection
+widget is required:
 
-- **Prompt**: "Which prototype path would you like to use? (Based on your concept, I'd recommend [path] — [one sentence reason].)"
-- **Options**:
-  - `HTML — browser prototype` — puzzle, card, turn-based, strategy, idle. Opens by double-clicking, no install. 85–90% reliable. **Not suitable for action games** — browser latency lies about feel.
-  - `Engine — native prototype` — action, platformer, physics, or anything where feel IS the hypothesis. 50–60% one-shot; 2–4 iteration rounds are normal. Requires engine installed.
-  - `Paper — rules document + play log` — strategy, economy, logic, board-game-style mechanics. 100% reliable. Cannot validate feel.
+- **HTML — browser prototype** — puzzle, card, turn-based, strategy, idle. Opens by double-clicking, no install. 85–90% reliable. **Not suitable for action games** — browser latency lies about feel.
+- **Engine — native prototype** — action, platformer, physics, or anything where feel IS the hypothesis. 50–60% one-shot; 2–4 iteration rounds are normal. Requires engine installed.
+- **Paper — rules document + play log** — strategy, economy, logic, board-game-style mechanics. 100% reliable. Cannot validate feel.
+
+> Auto-selection note: pick from the genre table; if `--path` was passed, use that.
+> The PROCEED/PIVOT/KILL verdict in Phase 6 (the creative judgment) is unaffected — only
+> the mechanical path-pick is automated.
 
 ---
 
@@ -400,9 +400,10 @@ Read `.claude/docs/templates/prototype-report.md` to get the report structure.
 Fill in every section based on what was observed during this session. Replace all
 placeholder text with real observations — no generic filler.
 
-Ask: "May I write this report to `prototypes/[concept-name]-concept/REPORT.md`?"
-
-If yes, write the file. Then update `prototypes/index.md` (create if it does not
+The verdict was captured from the user in Phase 6 (the creative judgment gate). Once
+captured, the report is a throwaway derived record — auto-write it to
+`prototypes/[concept-name]-concept/REPORT.md` (report-template schema check). No
+write-approval keystroke needed. Then update `prototypes/index.md` (create if it does not
 exist) — append one row to the concept prototype table: concept name, date, path
 used, verdict (PROCEED/PIVOT/KILL), and a link to the REPORT.md. If a PIVOT chain
 exists (prior PIVOT-NOTE.md in a related concept folder), note the chain. This file
@@ -458,10 +459,10 @@ two questions (plain text, one at a time):
 1. "What specifically worked in this prototype that we should preserve in the next version?"
 2. "What is the single most important thing to change?"
 
-Ask: "May I write this to `prototypes/[concept-name]-concept/PIVOT-NOTE.md`?"
-
-If yes, write the file with: original hypothesis, what to keep, what to change, and
-the revised hypothesis for the next prototype. When `/prototype` is next run, check
+Auto-write the carry-forward note to `prototypes/[concept-name]-concept/PIVOT-NOTE.md`
+(report-template schema check — the note is derived from the captured answers above). No
+write-approval keystroke needed. Write the file with: original hypothesis, what to keep,
+what to change, and the revised hypothesis for the next prototype. When `/prototype` is next run, check
 `prototypes/` for any `PIVOT-NOTE.md` files — if found, read them and use the
 revised hypothesis as the starting point rather than forming one from scratch.
 

@@ -20,14 +20,12 @@ See `.claude/docs/director-gates.md` for the full check pattern.
 
 **Review mode check** (before gates run):
 - Read `production/review-mode.txt` if it exists. Use that mode.
-- If the file doesn't exist and this is a `new` sprint: use `AskUserQuestion`:
-  - Prompt: "No review mode is set. Which review depth would you like for this sprint?"
-  - Options:
-    - `[A] full — spawn all director and lead gates`
-    - `[B] lean — skip non-phase-gate director reviews (recommended for most sprints)`
-    - `[C] solo — skip all gate spawning`
-  - After selection: write `production/review-mode.txt` with the chosen mode. Say: "Review mode set to [mode] and saved to production/review-mode.txt."
-- If the file doesn't exist and this is NOT a `new` sprint (e.g., updating an existing sprint): default to `lean` silently.
+- If the file doesn't exist: default to `lean`, write `production/review-mode.txt`
+  with `lean`, and say: "No review mode set — defaulting to lean and saved to
+  production/review-mode.txt. Override per-run with `--review full|lean|solo`."
+  (Replacement check: review-mode.txt resolves to a valid value. This sets review
+  DEPTH only — it does not skip the verification gates that run within the chosen
+  mode.)
 
 ---
 
@@ -108,7 +106,7 @@ For `update`:
 3. Ask the user what to change: stories to add, remove, reprioritize, or re-estimate. Use `AskUserQuestion` to gather changes.
 4. Apply the changes and re-present the full revised plan for review.
 5. Re-run the producer feasibility gate (Phase 4) on the revised plan.
-6. Write the updated markdown plan and yaml together (same approval as `new` mode).
+6. Auto-write the updated markdown plan and yaml together (same auto-write behavior as `new` mode — no approval gate).
 
 Note: `update` mode does not reset story statuses. Stories already marked `in-progress` or `done` keep their status. Only `backlog` and `ready-for-dev` stories can be removed or reprioritized freely.
 
@@ -211,20 +209,25 @@ Pass: proposed story list (titles, estimates, dependencies), total team capacity
 
 Present the producer's assessment.
 
-If UNREALISTIC: revise the story selection (defer stories to Should Have or Nice to Have) and re-present the updated plan before asking for write approval.
+**If UNREALISTIC** (objective capacity-vs-estimate math — sum(estimates) exceeds
+available days): auto-defer the overflow stories from Must Have down to Should
+Have / Nice to Have until the Must Have total fits within available days. This is
+an objective rebalance — no human pause. Re-present the rebalanced plan and note
+which stories were deferred and why. (Replacement check: sum(Must Have estimates)
+≤ available days after rebalance.)
 
-If CONCERNS, use `AskUserQuestion`:
-- Prompt: "Producer flagged concerns with this sprint plan. How do you want to proceed?"
-- Options:
-  - `[A] Proceed as planned — I accept the risk`
-  - `[B] Adjust scope — defer some Should Have stories`
-  - `[C] Extend the sprint timeline`
+**If CONCERNS** (a soft risk-tolerance flag, not a capacity failure): auto-proceed
+**with a logged rationale** — do not pause for human approval. Append a
+`## Producer Concerns (auto-accepted)` block to the sprint plan recording the
+specific concern raised and the rationale for proceeding (e.g., "buffer is tight
+but carryover risk is low"). The plan proceeds to the write step.
 
-If [A]: proceed to write approval.
-If [B]: revise the story list, re-present the updated plan, then proceed to write approval.
-If [C]: adjust sprint dates and capacity, re-present the updated plan, then proceed to write approval.
-
-After handling the producer's verdict, ask: "May I write the sprint plan to `production/sprints/sprint-[N].md` and `production/sprint-status.yaml`?" If yes, write both files (creating directories as needed). Verdict: **COMPLETE** — sprint plan and status file created. If no: Verdict: **BLOCKED** — user declined write.
+After handling the producer's verdict, auto-write the sprint plan to
+`production/sprints/sprint-[N].md` and `production/sprint-status.yaml` together
+(creating directories as needed) — the files are computed from the feasibility-checked
+plan, so no approval gate is required. (Replacement check: both files written
+atomically; the yaml status mapping matches the plan priorities.) Verdict:
+**COMPLETE** — sprint plan and status file created.
 
 After writing, add:
 
@@ -240,26 +243,22 @@ Use `Glob` to look for `production/qa/qa-plan-sprint-[N].md` or any file in `pro
 
 **If a QA plan is found**: note it in the sprint plan output — "QA Plan: `[path]`" — and proceed.
 
-**If no QA plan exists**: do not silently proceed. Surface this explicitly:
+**If no QA plan exists**: do not silently proceed and do not prompt — auto-inject a
+warning block into the sprint plan document and surface the next step in the
+output. (Replacement check: QA-plan presence is asserted; when absent, the warning
+block is auto-injected into the written plan.)
 
-> "This sprint has no QA plan. A sprint plan without a QA plan means test requirements are undefined — developers won't know what 'done' looks like from a QA perspective, and the sprint cannot pass the Production → Polish gate without one.
->
-> Run `/qa-plan sprint` now, before starting any implementation. It takes one session and produces the test case requirements each story needs."
-
-Use `AskUserQuestion`:
-- Prompt: "No QA plan found for this sprint. How do you want to proceed?"
-- Options:
-  - `[A] Run /qa-plan sprint now — I'll do that before starting implementation (Recommended)`
-  - `[B] Skip for now — I understand QA sign-off will be blocked at the Production → Polish gate`
-
-If [A]: close with "Sprint plan written. Run `/qa-plan sprint` next — then begin implementation."
-If [B]: add a warning block to the sprint plan document:
+Auto-inject this warning block into the sprint plan document:
 
 ```markdown
 > ⚠️ **No QA Plan**: This sprint was started without a QA plan. Run `/qa-plan sprint`
 > before the last story is implemented. The Production → Polish gate requires a QA
 > sign-off report, which requires a QA plan.
 ```
+
+Then close with: "Sprint plan written. No QA plan found — a warning block was added.
+Run `/qa-plan sprint` before implementation begins; the Production → Polish gate
+requires a QA sign-off report, which requires a QA plan."
 
 ---
 

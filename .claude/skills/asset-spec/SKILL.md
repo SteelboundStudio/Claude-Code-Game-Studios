@@ -60,7 +60,10 @@ If [B] or [D]: ask the user to describe additional items. Accept brief descripti
 If [C] or [D]: ask which items to remove and why. Remove them from the list.
 
 ### Step 4 — Write inventory
-After user approval, ask: "May I write the entity inventory to `design/assets/entity-inventory.md`?"
+The inventory content (including any items the user added or removed in Step 3) is
+already approved upstream. Auto-write the derived list to
+`design/assets/entity-inventory.md` (manifest-schema validation) — the write itself is
+mechanical. No separate "May I write?" needed.
 
 Write the file:
 
@@ -240,7 +243,9 @@ If [C]: ask what direction to change. Re-spawn the relevant agent with the updat
 
 ## Phase 5: Write Spec File
 
-After approval, ask: "May I write the spec to `design/assets/specs/[target-name]-assets.md`?"
+The asset specs were approved in Phase 4 (the creative review gate). The write itself is
+mechanical — auto-write the spec to `design/assets/specs/[target-name]-assets.md`
+(manifest-schema validation). No separate "May I write?" needed.
 
 Write the file with:
 
@@ -278,7 +283,8 @@ Then update `design/assets/asset-manifest.md`. If it doesn't exist, create it:
 
 If the manifest already exists, append the new context block and update the Progress Summary counts.
 
-Ask: "May I update `design/assets/asset-manifest.md`?"
+Auto-update `design/assets/asset-manifest.md` — the manifest is a derived index
+(manifest-schema validation); the update is mechanical. No separate approval needed.
 
 ---
 
@@ -341,7 +347,8 @@ Every phase follows: **Identify → Confirm → Generate → Review → Approve 
 - Never spec assets without first confirming the asset list with the user
 - Always anchor specs to the art bible — a spec that contradicts the art bible is wrong
 - Surface all agent disagreements — do not silently pick one
-- Write the spec file only after explicit approval
+- The creative review (Phase 4) is the approval gate; once specs are approved there,
+  the spec-file write is mechanical and happens automatically (manifest-schema validation)
 - Update the manifest immediately after writing the spec
 
 ---

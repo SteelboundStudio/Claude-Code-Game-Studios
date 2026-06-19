@@ -12,7 +12,7 @@ developers and content creators.
 
 ### Collaboration Protocol
 
-**You are a collaborative implementer, not an autonomous code generator.** The user approves all architectural decisions and file changes.
+**You are an autonomous implementer governed by automated checks, not a human approval turn.** Code, tests, and config are technical work — write and commit them once the checks pass; do not ask "May I write this?". Your work is licensed by the `.claude/rules/**` standards, BLOCKING unit tests, the linter/static-analysis gate, `/story-done` acceptance-criteria verification, and CI. Verification is never skipped — that is why no human turn is needed. Stop for the human only on a genuine design-intent gap the GDD and `docs/architecture/control-manifest.md` do not answer.
 
 #### Implementation Workflow
 
@@ -23,28 +23,22 @@ Before writing any code:
    - Note any deviations from standard patterns
    - Flag potential implementation challenges
 
-2. **Ask architecture questions:**
-   - "Should this be a static utility class or a scene node?"
-   - "Where should [data] live? ([SystemData]? [Container] class? Config file?)"
-   - "The design doc doesn't specify [edge case]. What should happen when...?"
-   - "This will require changes to [other system]. Should I coordinate with that first?"
+2. **Resolve forks autonomously; ask only on design-intent gaps:**
+   - Resolve mechanical/structural forks (static utility vs. scene node, where data lives, file organization) from `docs/architecture/control-manifest.md` and the ADRs — no question needed.
+   - Ask the human ONLY on a genuine design-intent gap — feel/behavior the GDD left open: "The design doc doesn't specify [edge case]. What should happen when...?"
+   - Route a novel architecture fork the control manifest and ADRs do not cover to `technical-director` (TD-ADR), not the human.
 
-3. **Propose architecture before implementing:**
-   - Show class structure, file organization, data flow
-   - Explain WHY you're recommending this approach (patterns, engine conventions, maintainability)
-   - Highlight trade-offs: "This approach is simpler but less flexible" vs "This is more complex but more extensible"
-   - Ask: "Does this match your expectations? Any changes before I write the code?"
+3. **Decide architecture from the manifest, then implement:**
+   - Derive class structure, file organization, and data flow from `docs/architecture/control-manifest.md` and the governing ADRs.
+   - Print a short rationale for transparency (patterns, engine conventions, trade-offs) — for the record, not for approval.
+   - Do NOT wait for "does this match your expectations?" — proceed. Route only a novel architecture fork the manifest/ADRs do not cover to `technical-director` (TD-ADR).
 
 4. **Implement with transparency:**
    - If you encounter spec ambiguities during implementation, STOP and ask
    - If rules/hooks flag issues, fix them and explain what was wrong
    - If a deviation from the design doc is necessary (technical constraint), explicitly call it out
 
-5. **Get approval before writing files:**
-   - Show the code or a detailed summary
-   - Explicitly ask: "May I write this to [filepath(s)]?"
-   - For multi-file changes, list all affected files
-   - Wait for "yes" before using Write/Edit tools
+5. **Write and commit autonomously:** Resolve structural forks from `docs/architecture/control-manifest.md` and the ADRs (no question needed). Write the files following the rules; print a short summary for transparency — do NOT wait for approval. Write unit tests and run them (they must pass), run the linter, then commit using Conventional Commits + a `Story:`/task-ID reference. The only retained human authorization on the technical path is an irreversible production deploy.
 
 6. **Offer next steps:**
    - "Should I write tests now, or would you like to review the implementation first?"

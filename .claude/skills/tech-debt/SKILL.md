@@ -41,45 +41,33 @@ Categorize each finding:
 - **Dependency Debt**: Outdated packages, deprecated APIs, version conflicts
 - **Performance Debt**: Known slow paths, unoptimized queries, memory issues
 
-Present the findings to the user.
-
-Ask: "May I write these findings to `docs/tech-debt-register.md`?"
-
-If yes, update the register (append new entries, do not overwrite existing ones). Verdict: **COMPLETE** — scan findings written to register.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Present the findings to the user, then auto-write them to
+`docs/tech-debt-register.md` — the findings are grep-derived (TODO/FIXME/HACK,
+file/function size) and categorized from a fixed taxonomy, so no approval gate is
+required. Append new entries; do not overwrite existing ones. (Replacement check:
+append-only — existing entries preserved; categories drawn from the fixed taxonomy.)
+Verdict: **COMPLETE** — scan findings written to register.
 
 ---
 
 ## Phase 2B: Add Mode
 
-Ask the user for the description, affected files, and impact if left unfixed (plain text prompts).
+If invoked with a description argument, auto-classify the **category** from
+keywords in the description and **infer the effort** from the file scope (number
+and size of affected files), rather than prompting. Map to:
+- Category taxonomy: Architecture / Code Quality / Test / Documentation /
+  Dependency / Performance Debt (keyword-matched).
+- Effort: S (under 1 day) / M (1–3 days) / L (3–7 days) / XL (over 1 week)
+  (inferred from file scope).
 
-Then use `AskUserQuestion` to collect the **category**:
-- Prompt: "What category does this tech debt belong to?"
-- Options:
-  - `[A] Architecture Debt — wrong abstractions, missing patterns, coupling issues`
-  - `[B] Code Quality Debt — duplication, complexity, naming, missing types`
-  - `[C] Test Debt — missing tests, flaky tests, untested edge cases`
-  - `[D] Documentation Debt — missing/outdated docs, undocumented APIs`
-  - `[E] Dependency Debt — outdated packages, deprecated APIs, version conflicts`
-  - `[F] Performance Debt — known slow paths, memory issues, unoptimized queries`
+Present the auto-classified entry and allow a human override of the category or
+effort if the user disagrees (override is optional, not a blocking gate). If no
+description was provided, ask for description, affected files, and impact (plain
+text prompts) before classifying.
 
-Then use `AskUserQuestion` to collect the **estimated fix effort**:
-- Prompt: "What is the estimated effort to fix this item?"
-- Options:
-  - `[A] S — Small (under 1 day)`
-  - `[B] M — Medium (1–3 days)`
-  - `[C] L — Large (3–7 days)`
-  - `[D] XL — Extra Large (over 1 week)`
-
-Present the complete new entry to the user.
-
-Ask: "May I append this entry to `docs/tech-debt-register.md`?"
-
-If yes, append the entry. Verdict: **COMPLETE** — entry added to register.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Auto-append the entry to `docs/tech-debt-register.md`. (Replacement check: the
+entry has category + effort + impact fields; manual override allowed.) Verdict:
+**COMPLETE** — entry added to register.
 
 ---
 
@@ -91,13 +79,11 @@ Score each item by: `(impact_if_unfixed × frequency_of_encounter) / fix_effort`
 
 Re-sort the register by priority score and recommend which items to include in the next sprint.
 
-Present the re-prioritized register to the user.
-
-Ask: "May I write the re-prioritized register back to `docs/tech-debt-register.md`?"
-
-If yes, write the updated file. Verdict: **COMPLETE** — register re-prioritized and saved.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Present the re-prioritized register to the user, then auto-write it back to
+`docs/tech-debt-register.md` — priority is the deterministic formula
+`(impact × frequency) / effort`, so no approval gate is required. (Replacement
+check: the re-sorted register matches the computed scores.) Verdict: **COMPLETE**
+— register re-prioritized and saved.
 
 ---
 

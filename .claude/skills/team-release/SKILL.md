@@ -72,6 +72,11 @@ Delegate to **release-manager**:
 - Output: release branch name and checklist
 
 ### Phase 3: Quality Gate (parallel)
+
+The quality gate is objective — run all checks headlessly and feed pass/fail into
+the Phase 5 go/no-go without a human gate. (Replacement check: regression pass +
+zero S1/S2 + reproducible build + zero CRITICAL/HIGH security.)
+
 Delegate in parallel:
 - **qa-lead**: Execute full regression test suite. Test all critical paths. Verify no S1/S2 bugs. Sign off on quality.
 - **devops-engineer**: Build release artifacts for all target platforms. Verify builds are clean and reproducible. Run automated tests in CI.
@@ -86,10 +91,16 @@ Delegate (can run in parallel with Phase 3 if resources available):
 - Output: localization, performance, and analytics sign-off
 
 ### Phase 5: Go/No-Go
+The go/no-go is the highest-stakes business/quality judgment and **stays human**.
+Pre-collect the objective gate inputs automatically (QA APPROVED, security no
+CRITICAL/HIGH, build reproducible, tests green) and present them as the decision
+inputs — but the human makes the call.
+
 Delegate to **producer**:
-- Collect sign-off from: qa-lead, release-manager, devops-engineer, security-engineer (if spawned in Phase 3), network-programmer (if spawned in Phase 3), and technical-director
+- Auto-collect the objective sign-off inputs from Phase 3 (QA APPROVED, security
+  posture, reproducible build, CI green) and present them
 - Evaluate any open issues — are they blocking or can they ship?
-- Make the go/no-go call
+- Make the go/no-go call (human judgment — KEEP)
 - Output: release decision with rationale
 
 **If producer declares NO-GO:**
@@ -109,11 +120,22 @@ After the user selects "Override NO-GO with documented rationale":
 - Only then proceed to Phase 6.
 
 ### Phase 6: Deployment (if GO)
+
+**Owner decision — auto on GO up to staging; KEEP one human authorization on the
+irreversible production push.** Once the Phase 5 verdict is GO, the reversible
+steps run automatically (no per-step approval): tag, changelog, staging deploy.
+The production deployment is irreversible and **retains an explicit human
+authorization step** before it runs. (Replacement check: deploy pipeline runs on
+GO; production-deploy requires explicit human authorization.)
+
 Delegate to **release-manager** + **devops-engineer**:
-- Tag the release in version control
-- Generate changelog using `/changelog`
-- Deploy to staging for final smoke test
-- Deploy to production
+- Tag the release in version control — **auto on GO**
+- Generate changelog using `/changelog` — **auto on GO**
+- Deploy to staging for final smoke test — **auto on GO**
+- **Deploy to production** — KEEP a human authorization: before pushing to
+  production, use `AskUserQuestion` to confirm ("Staging deploy succeeded. Authorize
+  the irreversible PRODUCTION deployment of [version]?"). Deploy to production only
+  on explicit authorization.
 - Human team action: Monitor dashboards and error rates for 48 hours post-release. Schedule a follow-up retrospective using `/retrospective` at the 48-hour mark.
 
 Delegate to **community-manager** (in parallel with deployment):

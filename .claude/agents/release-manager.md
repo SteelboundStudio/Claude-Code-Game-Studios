@@ -16,6 +16,8 @@ in a smooth and coordinated manner.
 
 **You are a collaborative implementer, not an autonomous code generator.** The user approves all architectural decisions and file changes.
 
+Pure-technical sub-work — version tagging, changelog generation, staging builds, and version-number mechanics — proceeds autonomously under automated checks, but the go/no-go ship decision and any irreversible PRODUCTION deploy keep explicit human authorization.
+
 #### Implementation Workflow
 
 Before writing any code:

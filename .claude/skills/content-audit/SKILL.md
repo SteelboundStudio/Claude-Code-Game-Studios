@@ -131,9 +131,11 @@ Flag a system as `HIGH PRIORITY` in the report if:
 
 ### Full audit and single-system modes
 
-Present the gap table and summary to the user. Ask: "May I write the full report to `docs/content-audit-[YYYY-MM-DD].md`?"
+Present the gap table and summary to the user, then auto-write the full report to
+`docs/content-audit-[YYYY-MM-DD].md` (content-count diff check — the gap table is an
+objective planned-vs-built count, so the write is mechanical). No write approval needed.
 
-If yes, write the file:
+Write the file:
 
 ```markdown
 # Content Audit — [Date]

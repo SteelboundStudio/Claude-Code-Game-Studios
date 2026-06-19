@@ -75,6 +75,14 @@ Spawn the `accessibility-specialist` agent in parallel to:
 - Review the audio event list for any that could cause issues for players with auditory sensitivities (high-frequency alerts, sudden loud events)
 - Output: audio accessibility requirements list integrated into the audio event spec
 
+**Accessibility assertion (objective, auto-blocking — no human gate):** every
+gameplay-critical audio event MUST have a documented visual fallback. This is a
+rule-based check, not a creative decision: if any gameplay-critical audio event
+lacks a visual fallback, the pipeline auto-blocks and reports the offending events.
+(Replacement check: each gameplay-critical audio event has a documented visual
+fallback.) The creative sonic-identity/tone decisions remain human (decision-point
+gates below).
+
 ### Step 3: Technical Implementation (parallel)
 Spawn the `technical-artist` agent to:
 - Design the audio middleware integration (Wwise/FMOD/native)

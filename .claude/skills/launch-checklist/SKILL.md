@@ -228,9 +228,10 @@ Generated: [Date]
 
 Present the completed checklist and summary to the user (total items, blocking items count, conditional items count, departments with incomplete sections).
 
-If not in dry-run mode, ask: "May I write this to `production/releases/launch-checklist-[date].md`?"
-
-If yes, write the file, creating directories as needed.
+If not in dry-run mode, auto-write the checklist to
+`production/releases/launch-checklist-[date].md` (checklist-template schema check — the
+checklist is derived output; the dry-run flag controls whether anything is written). In
+dry-run mode, write nothing. No write-approval keystroke needed. Create directories as needed.
 
 ---
 

@@ -215,27 +215,23 @@ After all revisions are complete, show a summary table (blocker → fix applied)
 
 Never end the revision flow with plain text. Always close with this widget.
 
-**Second widget — tracking records (combined, for APPROVED path):**
+**Second step — tracking records (auto-write once verdict is set):**
 
-When the verdict is APPROVED, use a single `AskUserQuestion` with `multiSelect: true` to batch the two tracking updates:
-- Prompt: "Verdict: APPROVED. I can update the tracking records now. Select any you'd like me to complete:"
-- Options:
-  - `Update systems-index.md status to 'Approved' for [system]`
-  - `Append approval entry to design/gdd/reviews/[doc-name]-review-log.md`
+The verdict (set by the creative-director synthesis above) is the judgment gate. Once it
+is set, the tracking-record updates are mechanical writes derived from the verdict
+(status-enum + log-append schema check) — auto-write them, no approval widget:
 
-If the review-log option is selected, append the same format as below. Execute both selected actions before showing the final closing widget.
+When the verdict is APPROVED:
+- Update `design/gdd/systems-index.md` status to `Approved` for [system] (status-enum:
+  exact string `Approved`, no parentheticals).
+- Append an approval entry to `design/gdd/reviews/[doc-name]-review-log.md` (log-append).
 
-When the verdict is NEEDS REVISION or MAJOR REVISION NEEDED, use separate widgets as before:
+When the verdict is NEEDS REVISION or MAJOR REVISION NEEDED:
+- Update `design/gdd/systems-index.md` status to the verdict-derived value (`In Review` or
+  `Needs Revision`, exact string).
+- Append the review summary to `design/gdd/reviews/[doc-name]-review-log.md`.
 
-Use a second `AskUserQuestion`:
-- Prompt: "May I update `design/gdd/systems-index.md` to mark [system] as [In Review / Approved]?"
-- Options: `[A] Yes — update it` / `[B] No — leave it as-is`
-
-Use a third `AskUserQuestion`:
-- Prompt: "May I append this review summary to `design/gdd/reviews/[doc-name]-review-log.md`? This creates a revision history so future re-reviews can track what changed."
-- Options: `[A] Yes — append to review log` / `[B] No — skip`
-
-If yes, append an entry in this format:
+Append the review-log entry in this format:
 ```
 ## Review — [YYYY-MM-DD] — Verdict: [APPROVED / NEEDS REVISION / MAJOR REVISION NEEDED]
 Scope signal: [S/M/L/XL]

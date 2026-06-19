@@ -162,10 +162,16 @@ The technical-director reviews whether:
 - The recommended actions are architecturally sound
 - Any cascading effects on other ADRs or systems were missed
 
-Apply the verdict:
+Apply the verdict (ADR-assumption-vs-GDD diff check — which ADRs are stale is computed
+automatically from the assumption-diff in Phase 5):
 - **APPROVE** → proceed to Phase 7 resolution workflow
-- **CONCERNS** → surface the specific ADRs or recommendations flagged; use `AskUserQuestion` with options: `Revise the impact assessment` / `Accept with noted concerns` / `Discuss further`
+- **CONCERNS** → if the flagged items are classification accuracy (an ADR's stale/valid
+  status), auto-accept the assumption-diff result and proceed to Phase 7, noting the
+  director's concerns inline — the diff is objective. Only surface via `AskUserQuestion`
+  (`Revise the impact assessment` / `Accept with noted concerns` / `Discuss further`) when
+  the concern is a genuine architectural-judgment call, not a mechanical classification.
 - **REJECT** → do not proceed to resolution; re-analyze the impact before continuing
+  (a REJECT means the impact analysis itself is wrong — this re-analysis stays human).
 
 ---
 
@@ -205,7 +211,9 @@ Ask: "May I update the traceability index?"
 
 ## 9. Output Change Impact Document
 
-Ask: "May I write the change impact report to `docs/architecture/change-impact-[date]-[system-slug].md`?"
+Auto-write the change impact report to
+`docs/architecture/change-impact-[date]-[system-slug].md` (impact-report schema check —
+the report is the derived impact analysis). No write-approval keystroke needed.
 
 The document contains:
 - The change summary from step 3
@@ -213,8 +221,7 @@ The document contains:
 - Resolution decisions made in step 7
 - List of ADRs that need to be written or updated
 
-If user approved: Verdict: **COMPLETE** — change impact report saved.
-If user declined: Verdict: **BLOCKED** — user declined write.
+Verdict: **COMPLETE** — change impact report saved.
 
 ---
 
@@ -235,5 +242,8 @@ Based on the resolution decisions, suggest:
 1. **Read silently** — compute the full impact before presenting anything
 2. **Show the full report first** — let the user see the scope before asking for action
 3. **Ask per-ADR** — don't batch decisions; each affected ADR may need different treatment
-4. **Ask before writing** — always confirm before modifying any file
+   (resolution of a stale ADR is a design judgment that stays human)
+4. **Auto-write the derived report** — the change impact report is derived from the
+   objective assumption-diff (impact-report schema check) and is written automatically.
+   Per-ADR status edits still follow the human resolution decisions in Phase 7.
 5. **Non-destructive** — never delete ADR content; only add "Superseded by" notes

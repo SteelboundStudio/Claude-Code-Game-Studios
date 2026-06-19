@@ -77,6 +77,13 @@ Delegate to **economy-designer**:
 - Verify no pay-to-win items in premium track
 - Output: economy design doc with reward tables, pricing, and currency flow
 
+**Economy assertions (objective, auto — no human gate):** run these as rule checks
+without prompting — the premium track contains no power-affecting (pay-to-win)
+items, and every random reward has a defined pity / bad-luck protection rule.
+(Replacement check: premium track has no power-affecting items; every random
+reward has a pity/bad-luck rule.) Failures feed the Phase 7 ethics gate. The
+fairness/feel of the monetization remains a human judgment (Phase 7).
+
 ### Phase 4: Analytics and Success Metrics (parallel with Phase 3)
 Delegate to **analytics-engineer**:
 - Read the season brief
@@ -121,7 +128,11 @@ Ask the user to approve the season plan before delegating to production teams. I
 
 ## Output Documents
 
-All documents save to `design/live-ops/`:
+All documents save to `design/live-ops/`. Once the Phase 7 ethics gate clears
+(no unresolved ethics violation), **auto-write** these derived planning docs — they
+compile the approved phase outputs, so no per-file approval gate is required.
+(Replacement check: season doc + analytics plan + comms calendar all present; do
+NOT write any document while an ethics flag remains unresolved.)
 - `seasons/S[N]_[name].md` — Season design document (from Phase 1-3)
 - `seasons/S[N]_[name]_analytics.md` — Analytics plan (from Phase 4)
 - `seasons/S[N]_[name]_comms.md` — Communication calendar (from Phase 6)
@@ -143,8 +154,10 @@ If a BLOCKED state is unresolvable, end with Verdict: **BLOCKED** instead of COM
 ## File Write Protocol
 
 All file writes (season design docs, analytics plans, communication calendars) are
-delegated to sub-agents spawned via Task. Each sub-agent enforces the
-"May I write to [path]?" protocol. This orchestrator does not write files directly.
+delegated to sub-agents spawned via Task. The derived planning docs are auto-written
+once the Phase 7 ethics gate clears (see Output Documents) — no per-file approval
+gate. This orchestrator does not write files directly. The fairness/feel and final
+season-plan approval (Phase 7) and the ethics override decision remain human.
 
 ## Output
 

@@ -72,14 +72,27 @@ Then spawn the **primary engine specialist** to validate the proposed architectu
 - Any proposed APIs that are deprecated or changed in the pinned engine version?
 - Output: engine architecture notes — incorporate into the architecture before Phase 3 begins
 
-Use `AskUserQuestion`:
-- Prompt: "Architecture sketch complete. Approve to proceed with parallel implementation."
+**Owner decision — split the architecture gate (objective auto, design-intent human).**
+
+**Objective check (BLOCKING, auto — no human gate):** the engine-specialist
+validation above is objective. If it returns blocking issues (deprecated APIs,
+non-idiomatic structure), auto-block and require those fixed before Phase 3. If it
+returns no blocking idiom/deprecation issues, **auto-advance to Phase 3** without
+prompting. (Replacement check: engine-specialist check returns no deprecated APIs
+and an idiomatic structure.)
+
+**Design-intent review (human — full mode only):** genuine architecture-design
+choices ("is this the right abstraction") remain a human judgment. In `full` mode,
+present the architecture and use `AskUserQuestion`:
+- Prompt: "Engine validation passed. Confirm the architecture design before parallel implementation."
 - Options:
   - `[A] Proceed — spawn implementation agents (gameplay-programmer, ai-programmer, technical-artist, sound-designer)`
   - `[B] Revise the architecture first — I'll describe what needs to change`
   - `[C] Stop here — I'll continue later`
 
-Only spawn implementation agents if user selects [A].
+In `lean`/`solo` mode, skip the design-intent prompt and auto-advance once the
+objective engine check passes (note: "Architecture design-intent review skipped —
+[mode] mode; engine validation gate still enforced").
 
 ### Phase 3: Implementation (parallel where possible)
 Delegate in parallel:
@@ -94,11 +107,16 @@ Delegate in parallel:
 - Verify the feature works with existing combat systems
 
 ### Phase 5: Validation
-Delegate to **qa-tester**:
+Delegate to **qa-tester** (objective verification — runs without a human gate):
 - Write test cases from the acceptance criteria
 - Test all edge cases documented in the design
 - Verify performance impact is within budget
 - File bug reports for any issues found
+
+This is objective: tests exist per acceptance criterion, pass, and performance is
+within budget. Run it without gating. (Replacement check: tests exist per AC,
+pass, and perf is within budget — failures block the Phase 6 COMPLETE verdict.)
+The Phase 6 feel/design sign-off remains a human judgment.
 
 ### Phase 6: Sign-off
 - Collect results from all team members

@@ -544,6 +544,11 @@ PASS: No blocking issues. Warnings present but don't prevent architecture.
 CONCERNS: Warnings present that should be resolved but are not blocking.
 FAIL: One or more blocking issues must be resolved before architecture begins.
 
+**Verdict computation (HYBRID):** any blocking *consistency* finding auto-asserts
+FAIL — this is objective and requires no human call. Design-theory CONCERNS are
+surfaced for the human to resolve (which GDD wins is a taste judgment, never
+decided unilaterally).
+
 ### If FAIL — required actions before re-running:
 [Specific list of what must change in which GDD]
 ```
@@ -552,21 +557,24 @@ FAIL: One or more blocking issues must be resolved before architecture begins.
 
 ## Phase 6: Write Report and Flag GDDs
 
-Use `AskUserQuestion` for write permission:
-- Prompt: "May I write this review to `design/gdd/gdd-cross-review-[date].md`?"
-- Options: `[A] Yes — write the report` / `[B] No — skip`
+Auto-write the review report to `design/gdd/gdd-cross-review-[date].md` — the
+findings are computed (consistency, design-theory, and scenario passes), so no
+approval gate is required. (Replacement check: the report must contain
+Consistency + Design-Theory + Scenario sections and a verdict before it is
+considered complete.)
 
-If any GDDs are flagged for revision, use a second `AskUserQuestion`:
-- Prompt: "Should I update the systems index to mark these GDDs as needing revision? ([list of flagged GDDs])"
-- Options: `[A] Yes — update systems index` / `[B] No — leave as-is`
-- If yes: update each flagged GDD's Status field in systems-index.md to "Needs Revision".
-  (Do NOT append parentheticals to the status value — other skills match "Needs Revision"
-  as an exact string and parentheticals break that match.)
+For systems-index status: auto-set the Status field to "Needs Revision" for any
+GDD that the **consistency pass objectively flagged with a Blocking finding**
+(exact-string write). Do NOT auto-change status for GDDs flagged only by the
+design-theory pass — those are taste judgments the human resolves.
+(Do NOT append parentheticals to the status value — other skills match "Needs Revision"
+as an exact string and parentheticals break that match.)
+(Replacement check: status is written only for GDDs with a Blocking consistency finding.)
 
 ### Session State Update
 
-After writing the report (and updating systems index if approved), silently
-append to `production/session-state/active.md`:
+After writing the report (and updating systems index for consistency-flagged
+GDDs), silently append to `production/session-state/active.md`:
 
     ## Session Extract — /review-all-gdds [date]
     - Verdict: [PASS / CONCERNS / FAIL]
@@ -574,10 +582,7 @@ append to `production/session-state/active.md`:
     - Flagged for revision: [comma-separated list, or "None"]
     - Blocking issues: [N — brief one-line descriptions, or "None"]
     - Recommended next: [the Phase 7 handoff action, condensed to one line]
-    - Report: design/gdd/gdd-cross-review-[date].md   ← only if user approved the write
-    - Report: (not written — user declined at [date])  ← only if user declined the write
-
-Use the appropriate line based on the user's response to the write-permission widget in Phase 6.
+    - Report: design/gdd/gdd-cross-review-[date].md
 
 If `active.md` does not exist, create it with this block as the initial content.
 Confirm in conversation: "Session state updated."
@@ -632,8 +637,8 @@ If any spawned agent returns BLOCKED, errors, or fails to complete:
 3. **Distinguish blocking from advisory** — not every issue needs to block
    architecture; be clear about which do
 4. **Don't make design decisions** — flag contradictions and options, but never
-   unilaterally decide which GDD is "right"
-5. **Ask before writing** — confirm before writing the report or updating the
-   systems index
+   unilaterally decide which GDD is "right" (design-theory CONCERNS stay human)
+5. **Auto-write** — the report is computed; write it without an approval gate, and
+   auto-flag systems-index status only for GDDs with a Blocking consistency finding
 6. **Be specific** — every issue must cite the exact GDD, section, and text
    involved; no vague warnings

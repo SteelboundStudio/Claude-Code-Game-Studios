@@ -114,18 +114,16 @@ After decomposing all stories (Step 4 complete) but before presenting them for w
 
 Pass: the full story list with acceptance criteria, story types, and TR-IDs; the epic's GDD acceptance criteria for reference.
 
-Present the QA lead's assessment. For each story flagged as GAPS or INADEQUATE, revise the acceptance criteria before proceeding — stories with untestable criteria cannot be implemented correctly. Once all stories reach ADEQUATE, proceed.
+Present the QA lead's assessment. For each story flagged as GAPS or INADEQUATE, auto-revise
+the acceptance criteria and re-check — the revise loop is rule-checkable (story-readiness
+READY criteria check), so no human turn is needed. Stories whose criteria cannot be made
+testable are auto-blocked (`Status: Blocked`). Once all stories reach ADEQUATE, proceed.
 
-**Before generating test specs**: Glob `production/qa/qa-plan-*.md` for the most recently modified file. If found, read it and check whether it contains test case specifications for the stories in this epic (look for story titles or slugs in the plan's Automated Tests Required section). If matching specs exist:
-- Use `AskUserQuestion`:
-  - Prompt: "A QA plan exists at [path] with test specs for some of these stories. How do you want to proceed?"
-  - Options:
-    - `Use existing specs from the QA plan — embed them into the story files (Recommended)`
-    - `Ask qa-lead to generate fresh specs — override the QA plan`
-    - `Skip test spec generation — I'll fill in ## QA Test Cases manually`
-- If "Use existing specs": extract the test case specs from the qa-plan for each matching story and embed them directly into the `## QA Test Cases` section. No qa-lead spawn needed for those stories. Only spawn qa-lead for stories with no coverage in the qa-plan.
-- If "Generate fresh": proceed with the qa-lead spawn below as normal.
-- If "Skip": leave `## QA Test Cases` with a placeholder: `*Test cases not yet defined — run /qa-plan to generate them.*`
+**Before generating test specs**: Glob `production/qa/qa-plan-*.md` for the most recently modified file. If found, read it and check whether it contains test case specifications for the stories in this epic (look for story titles or slugs in the plan's Automated Tests Required section). If matching specs exist, auto-reuse them (file-presence + spec-coverage check — an existing QA plan is the authoritative spec source):
+- Extract the test case specs from the qa-plan for each matching story and embed them directly into the `## QA Test Cases` section. No qa-lead spawn needed for those stories.
+- Only spawn qa-lead for stories with no coverage in the qa-plan.
+
+No "how do you want to proceed?" prompt — reusing existing approved specs is the default.
 
 **After ADEQUATE** (or after qa-plan import): for every Logic and Integration story, ask the qa-lead to produce concrete test case specifications — one per acceptance criterion — in this format:
 
@@ -171,9 +169,10 @@ Story 003: [title] — Visual/Feel — ADR-NNNN
 [N stories total: N Logic, N Integration, N Visual/Feel, N UI, N Config/Data]
 ```
 
-Use `AskUserQuestion`:
-- Prompt: "May I write these [N] stories to `production/epics/[epic-slug]/`?"
-- Options: `[A] Yes — write all [N] stories` / `[B] Not yet — I want to review or adjust first`
+Auto-write the story set to `production/epics/[epic-slug]/` (story-template schema check:
+each story embeds TR-ID, ADR, acceptance criteria, and test-evidence path). The stories
+are derived from the epic, GDD, ADRs, and manifest, so the write is mechanical; no
+write-approval keystroke needed. Present the list above, then write.
 
 ---
 
@@ -323,11 +322,12 @@ Note in output: "Work through stories in order — each story's `Depends on:` fi
 1. **Read before presenting** — load all inputs silently before showing the story list
 2. **Ask once** — present all stories for the epic in one summary, not one at a time
 3. **Warn on blocked stories** — flag any story with a Proposed ADR before writing
-4. **Ask before writing** — get approval for the full story set before writing files
+4. **Auto-write the derived story set** — stories are derived from the epic, GDD, ADRs,
+   and manifest, so the write is mechanical and automatic (story-template schema check)
 5. **No invention** — acceptance criteria come from GDDs, implementation notes from ADRs, rules from the manifest
 6. **Never start implementation** — this skill stops at the story file level
 
 After writing (or declining):
 
 - **Verdict: COMPLETE** — [N] stories written to `production/epics/[epic-slug]/`. Run `/story-readiness` → `/dev-story` to begin implementation.
-- **Verdict: BLOCKED** — user declined. No story files written.
+- **Verdict: BLOCKED** — no eligible stories (e.g. all governing ADRs Proposed/missing). No story files written.

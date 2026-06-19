@@ -141,24 +141,18 @@ Output both changelogs to the user. The internal changelog is the primary workin
 
 ---
 
-## Phase 7: Offer File Write
+## Phase 7: Write File
 
-After presenting the changelogs, ask the user:
+After presenting the changelogs, auto-write to `docs/CHANGELOG.md` (conventional-commit
+parse + schema check — the changelog is derived from git + sprint data, so the write is
+mechanical). No write approval needed.
 
-> "May I write this changelog to `docs/CHANGELOG.md`?
-> [A] Yes, append this entry (recommended if the file already exists)
-> [B] Yes, overwrite the file entirely
-> [C] No — I'll copy it manually"
-
-- Check whether `docs/CHANGELOG.md` exists before asking. If it does, default the
-  recommendation to **[A] append**.
-- If the user selects [A]: append the new internal changelog entry to the top of
-  the existing file (newest entries first).
-- If the user selects [B]: overwrite the file with the new changelog.
-- If the user selects [C]: stop here without writing.
+- Check whether `docs/CHANGELOG.md` exists. If it does, **append** the new internal
+  changelog entry to the top of the existing file (newest entries first) — never
+  overwrite an existing changelog (append-only guard).
+- If the file does not exist, create it with this entry.
 
 After a successful write: Verdict: **CHANGELOG WRITTEN** — changelog saved to `docs/CHANGELOG.md`.
-If the user declines: Verdict: **COMPLETE** — changelog generated.
 
 ---
 

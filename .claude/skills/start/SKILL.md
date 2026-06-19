@@ -189,22 +189,23 @@ Check if `production/review-mode.txt` already exists.
 
 **If it exists**: Read it and show the current mode — "Review mode is set to `[current]`." — then proceed to Phase 4. Do not ask again.
 
-**If it does not exist**: Use `AskUserQuestion`:
+**If it does not exist**: default to `lean` and write it silently — do not block
+onboarding on this config choice. Create the `production/` directory if it does
+not exist, write `lean` to `production/review-mode.txt`, then keep the option
+visible without blocking:
 
-- **Prompt**: "One setup choice: how much design review would you want as you work through the workflow?"
-- **Options**:
-  - `Full` — Director specialists review at each key workflow step. Best for teams, learning the workflow, or when you want thorough feedback on every decision.
-  - `Lean (recommended)` — Directors only at phase gate transitions (/gate-check). Skips per-skill reviews. Balanced approach for solo devs and small teams.
-  - `Solo` — No director reviews at all. Maximum speed. Best for game jams, prototypes, or if the reviews feel like overhead.
+> "I've defaulted your review mode to `lean` (directors review only at phase-gate
+> transitions — balanced for solo devs and small teams). You can change it anytime:
+> tell me `full` (directors review every key step) or `solo` (no director reviews,
+> maximum speed)."
 
-Write the choice to `production/review-mode.txt` immediately after the user
-selects — no separate "May I write?" needed, as the write is a direct
-consequence of the selection:
+If the user states a preference, rewrite the file accordingly:
 - `Full` → write `full`
-- `Lean (recommended)` → write `lean`
+- `Lean` → write `lean`
 - `Solo` → write `solo`
 
-Create the `production/` directory if it does not exist.
+(Replacement check: review-mode.txt is written with a valid value. This sets review
+DEPTH only — it never skips the verification gates that run within the chosen mode.)
 
 ---
 

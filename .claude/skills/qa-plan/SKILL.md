@@ -38,12 +38,13 @@ Determine scope from the argument:
   to stories whose file path or title contains the system name. Also check the
   epic index file (`EPIC.md`) in that system's directory.
 - **`story: [path]`** — validate that the path exists and load that single file.
-- **No argument** — use `AskUserQuestion`:
-  - "What is the scope for this QA plan?"
-  - Options: "Current sprint", "Specific feature (enter system name)",
-    "Specific story (enter path)", "Full epic"
+- **No argument** — auto-infer scope without prompting: if a sprint plan exists
+  in `production/sprints/` or `production/sprint-status.yaml` exists, use `sprint`;
+  otherwise default to the most-recent epic. (Replacement check: resolved-scope
+  assertion — N stories loaded > 0, else emit an explicit MISSING note.)
 
 After resolving scope, report: "Building QA plan for [N] stories in [scope]."
+If zero stories resolve, emit a MISSING note stating no in-scope stories were found.
 
 If a story file path is referenced but the file does not exist, note it as
 MISSING and continue with the remaining stories. Do not fail the entire plan
@@ -230,20 +231,23 @@ test entry should reflect the real requirements of these specific stories.
 
 ## Phase 5: Write Output
 
-Show the complete plan in conversation (or a summary if the plan is very long),
-then ask two questions together using `AskUserQuestion`:
+Show a summary of the plan in conversation, then auto-write the artifacts (the
+QA plan is computed from objective inputs — story Type fields, GDD formulas, and
+acceptance criteria — so no approval gate is required):
 
-```
-question: "Ready to write the QA plan. Choose output options:"
-multiSelect: true
-options:
-  - "Write QA plan to production/qa/qa-plan-[sprint-slug]-[date].md"
-  - "Also back-fill test case specs into each story file's ## QA Test Cases section (Recommended — enables /dev-story and /code-review traceability)"
-```
+1. Write the plan file to `production/qa/qa-plan-[sprint-slug]-[date].md` exactly
+   as generated — do not truncate.
+2. Back-fill test case specs into each story file unconditionally for Logic and
+   Integration stories: edit the story file at its path, find the `## QA Test
+   Cases` section and replace its content with the test case specs generated in
+   Phase 4 for that story. If a story has no `## QA Test Cases` section, append it
+   before `## Test Evidence`. For Visual/Feel and UI stories, write the manual
+   verification steps instead of test specs.
 
-If "Write QA plan" is selected: write the plan file exactly as generated — do not truncate.
-
-If "Also back-fill story files" is selected: for each Logic and Integration story in scope, edit the story file at its path. Find the `## QA Test Cases` section and replace its content with the test case specs generated in Phase 4 for that story. If a story has no `## QA Test Cases` section, append it before `## Test Evidence`. For Visual/Feel and UI stories, write the manual verification steps instead of test specs.
+**Replacement check (section-completeness validator):** before declaring the write
+complete, verify the plan contains Test Summary + Automated Tests + Smoke Scope +
+Definition of Done sections, and that every in-scope story has a Type and a
+matching test-case block. Report any missing section rather than silently skipping it.
 
 After writing:
 
@@ -265,7 +269,8 @@ Silently append to `production/session-state/active.md` (create the file if it d
 
 ## Collaborative Protocol
 
-- **Never write the plan without asking** — Phase 5 requires explicit approval.
+- **Auto-write the plan** — Phase 5 writes the computed artifacts without an
+  approval gate; the section-completeness validator is the replacement check.
 - **Classify conservatively**: when a story is ambiguous between Logic and
   Integration, classify it as Integration — it requires both unit and
   integration tests.
@@ -273,6 +278,5 @@ Silently append to `production/session-state/active.md` (create the file if it d
   support. If a formula is absent from the GDD, flag it rather than guessing.
 - **Playtest requirements are advisory**: the user decides whether a playtest
   is warranted for borderline Visual/Feel stories. Flag the case; do not mandate.
-- Use `AskUserQuestion` for scope selection when no argument is provided.
-  Keep all other phases non-interactive — present findings, then ask once to
-  approve the write.
+- Scope is auto-inferred when no argument is provided. Keep all phases
+  non-interactive — present findings, then auto-write the artifacts.
