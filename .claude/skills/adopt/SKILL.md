@@ -62,15 +62,13 @@ Use the same heuristic as `/project-stage-detect`:
 - game-concept.md exists → Concept
 - Nothing → Fresh (not a brownfield project — suggest `/start`)
 
-If the project appears fresh (no artifacts at all), use `AskUserQuestion`:
+If the project appears fresh (no artifacts at all), auto-route (artifact-presence
+glob check): there is nothing to migrate. Emit:
 - "This looks like a fresh project — no existing artifacts found. `/adopt` is for
-  projects with work to migrate. What would you like to do?"
-  - "Run `/start` — begin guided first-time onboarding"
-  - "My artifacts are in a non-standard location — help me find them"
-  - "Cancel"
+  projects with work to migrate. Run `/start` to begin guided first-time onboarding.
+  (If your artifacts are in a non-standard location, point me at them and re-run.)"
 
-Then stop — do not proceed with the audit regardless of which option the user picks
-(each option leads to a different skill or manual investigation).
+Then stop — do not proceed with the audit (there is nothing to audit).
 
 Report: "Detected phase: [phase]. Found: [N] GDDs, [M] ADRs, [P] stories."
 
@@ -269,20 +267,15 @@ If a prior adoption plan was detected in Phase 1, add a note:
 > "A previous plan exists at `docs/adoption-plan-[prior-date].md`. The new plan will
 > reflect current project state — it does not diff against the prior run."
 
-Use `AskUserQuestion`:
-- "Ready to write the migration plan?"
-  - "Yes — write `docs/adoption-plan-[date].md`"
-  - "Show me the full plan preview first (don't write yet)"
-  - "Cancel — I'll handle migration manually"
-
-If the user picks "Show me the full plan preview", output the complete plan as a
-fenced markdown block. Then ask again with the same three options.
+Then auto-write the migration plan to `docs/adoption-plan-[date].md`
+(schema/format-compliance check — the plan is derived from the objective format scan;
+the summary and gap preview above are still produced). No write approval needed.
 
 ---
 
 ## Phase 6: Write the Adoption Plan
 
-If approved, write `docs/adoption-plan-[date].md` with this structure:
+Write `docs/adoption-plan-[date].md` with this structure:
 
 ```markdown
 # Adoption Plan
@@ -434,8 +427,9 @@ Use `AskUserQuestion`:
 ## Collaborative Protocol
 
 1. **Read silently** — complete the full audit before presenting anything
-2. **Show the summary first** — let the user see scope before asking to write
-3. **Ask before writing** — always confirm before creating the adoption plan file
+2. **Show the summary first** — present the summary and gap preview before writing
+3. **Auto-write the derived plan** — the adoption plan is a derived artifact from the
+   objective format-compliance scan; write it automatically (schema/format-compliance check)
 4. **Offer, don't force** — the plan is advisory; the user decides what to fix and when
 5. **One action at a time** — after handing off the plan, offer one specific next step,
    not a list of six things to do simultaneously

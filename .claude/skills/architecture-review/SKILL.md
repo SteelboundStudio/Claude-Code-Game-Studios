@@ -456,18 +456,17 @@ FAIL: Critical gaps (Foundation/Core layer requirements uncovered),
 
 ## Phase 8: Write and Update Traceability Index
 
-Use `AskUserQuestion` for the write approval:
-- "Review complete. What would you like to write?"
-  - [A] Write all three files (review report + traceability index + TR registry)
-  - [B] Write review report only — `docs/architecture/architecture-review-[date].md`
-  - [C] Don't write anything yet — I need to review the findings first
+Auto-write the derived files — the review report, traceability index, and TR registry
+are all derived from the objective coverage scan (traceability-matrix-complete check).
+Write the review report to `docs/architecture/architecture-review-[date].md` and the
+traceability index alongside it. No write approval needed; the matrix and verdict are
+still produced and shown above.
 
 ### RTM Output (rtm mode only)
 
-For `rtm` mode, use `AskUserQuestion`:
-- "May I write the full Requirements Traceability Matrix?"
-  - [A] Yes — write to `docs/architecture/requirements-traceability.md`
-  - [B] Not yet — show me the full RTM data first, then ask again
+For `rtm` mode, auto-write the full Requirements Traceability Matrix to
+`docs/architecture/requirements-traceability.md` (traceability-matrix-complete check —
+the RTM is derived from the objective GDD→ADR→Story→Test coverage scan).
 
 RTM file format:
 
@@ -527,15 +526,15 @@ Requirements where the full chain is broken, prioritised by layer:
 
 ### TR Registry Update
 
-Also ask: "May I update `docs/architecture/tr-registry.yaml` with new requirement
-IDs from this review?"
-
-If yes:
+Auto-update `docs/architecture/tr-registry.yaml` with new requirement IDs from this
+review (traceability-matrix-complete check + append-only invariant — the registry is a
+derived index):
 - **Append** any new TR-IDs that weren't in the registry before this review
 - **Update** `requirement` text and `revised` date for any entries whose GDD
   wording changed (ID stays the same)
 - **Mark** `status: deprecated` for any registry entries whose GDD requirement
-  no longer exists (confirm with user before marking deprecated)
+  no longer exists (confirm with user before marking deprecated — removing a
+  requirement is a judgment call)
 - **Never** renumber or delete existing entries
 - Update the `last_updated` and `version` fields at the top
 
@@ -656,10 +655,10 @@ If any spawned agent returns BLOCKED, errors, or fails to complete:
 4. **Draft before approval** — always show the content that will be written (the
    report, the updated ADR section, the systems-index row) inline in the conversation
    before requesting approval. Never ask to write something the user has not yet seen.
-5. **Use `AskUserQuestion` for write approvals** — plain text "May I?" is not
-   sufficient. Use the structured tool with labeled options [A]/[B]/[C] so the
-   user can choose between "write now", "show full draft first", and "not yet".
-   Multi-file changesets must list every file and what changes, then ask once
-   with grouped options — not a separate plain-text question per file.
+5. **Auto-write derived artifacts** — the review report, traceability index, RTM, and
+   TR registry are all derived from the objective coverage scan (traceability-matrix-complete
+   check); write them automatically after presenting the matrix and verdict. The exception
+   is the Phase 5b systems-index revision flags, which change design status and still require
+   the user's call.
 6. **Non-blocking** — the verdict is advisory; the user decides whether to continue
    despite CONCERNS or even FAIL findings

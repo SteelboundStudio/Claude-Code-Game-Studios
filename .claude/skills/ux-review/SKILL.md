@@ -201,6 +201,14 @@ Run all checks against a `hud-design.md`-based document.
 
 ## Phase 4: Output the Verdict
 
+The objective portions of the verdict — required-section presence, GDD requirement
+coverage, accessibility-tier match, and input-method coverage — are computed and
+emitted automatically without a human gate. (Replacement check: required-sections
+checklist + GDD requirement coverage + accessibility tier match + input-method
+coverage.) The one judgment that remains human is **player-need clarity** (is the
+purpose genuinely written from the player's perspective) — surface that as an
+advisory finding for the human to weigh.
+
 ```markdown
 ## UX Review: [Document Name]
 **Date**: [date]

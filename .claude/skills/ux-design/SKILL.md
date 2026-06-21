@@ -94,9 +94,12 @@ must satisfy the accessibility tier committed to there.
 
 ### 2h: Input Method (from Project Config)
 
-Read `.claude/docs/technical-preferences.md` and extract the `## Input & Platform`
-section. Store these values for use throughout the skill — they drive the
-Interaction Map and inform accessibility requirements:
+Auto-read input methods from `.claude/docs/technical-preferences.md` `## Input &
+Platform` section — do not prompt when the values are configured. Store these for
+use throughout the skill — they drive the Interaction Map and inform accessibility
+requirements. (Replacement check: input methods are sourced from tech-prefs; the
+filename is kebab-cased deterministically from the argument.) Only ask when the
+section is unconfigured (see below).
 
 - **Input Methods** — e.g., Keyboard/Mouse, Gamepad, Touch, Mixed
 - **Primary Input** — the dominant input for this game
@@ -844,17 +847,19 @@ Document gaps in the Gaps section for follow-up.
 
 ## 5. Cross-Reference Check
 
-Before marking the spec as ready for review, run these checks:
+Before marking the spec as ready for review, run these checks **headlessly** —
+they are objective cross-reference validations; surface gaps without prompting.
+(Replacement check: each GDD UI requirement mapped; nav entry/exit matches related
+specs; empty states present.)
 
 **1. GDD requirement coverage**: Does every GDD UI Requirement that references
-this screen have a corresponding element in this spec? Present any gaps.
+this screen have a corresponding element in this spec? Surface any gaps.
 
 **2. Pattern library alignment**: Are all interaction patterns used in this spec
-referenced by name? If a new pattern was invented during this spec session, flag
-it for addition to the pattern library:
-Use `AskUserQuestion`:
-- "This spec uses [pattern name], which isn't in the pattern library yet. What should we do?"
-- Options: "Add it to the pattern library now", "Flag it as a gap and continue", "Skip — this pattern is one-off"
+referenced by name? If a new pattern was invented during this spec session,
+auto-flag it as a gap in the cross-reference results (the actual decision to write
+it into the pattern library is creative and handled when the library is authored —
+do not prompt here).
 
 **3. Navigation consistency**: Do the entry/exit points in this spec match the
 navigation map in any related specs? Flag mismatches.

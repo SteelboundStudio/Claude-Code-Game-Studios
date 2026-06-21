@@ -292,15 +292,21 @@ cross-GDD consistency check failed and must be resolved before advancing.
 
 ---
 
-## 4. Collaborative Assessment
+## 4. Assessment
 
-For items that can't be automatically verified, **ask the user**:
+**Objective items are computed, not asked** (artifact-presence + verdict-line parse):
+every artifact-exists check and every "verdict-line is not FAIL" check (e.g. a referenced
+`/design-review`, `/review-all-gdds`, `/architecture-review`, or `/smoke-check` report
+exists and its verdict line is not FAIL) is resolved programmatically with Glob / Read /
+Grep — no human turn. Mark each PASS or FAIL from the file evidence directly.
 
-- "I can't automatically verify that the core loop plays well. Has it been playtested?"
-- "No playtest report found. Has informal testing been done?"
-- "Performance profiling data isn't available. Would you like to run `/perf-profile`?"
+**Only genuinely subjective items are asked of the user** — the "feel" / fun checks that
+cannot be derived from any artifact:
 
-**Never assume PASS for unverifiable items.** Mark them as MANUAL CHECK NEEDED.
+- "I can't verify that the core mechanic *feels good* to interact with — this is subjective. Has it been playtested, and does it feel right?"
+
+For these subjective items only, **never assume PASS** — mark them MANUAL CHECK NEEDED and
+ask. Do not ask about anything an artifact can answer.
 
 ---
 
@@ -342,8 +348,11 @@ Art Director:       [READY / CONCERNS / NOT READY]
   [feedback]
 ```
 
-**Apply to the verdict:**
-- Any director returns NOT READY → verdict is minimum FAIL (user may override with explicit acknowledgement)
+**Apply to the verdict (per-director objective-criteria check):** each director's verdict
+rolls up from objective sub-criteria where those exist — auto-roll those automatically.
+Reserve the human override only for a director's subjective items (e.g. "feels good",
+design taste) that cannot be objectively decided.
+- Any director returns NOT READY → verdict is minimum FAIL (user may override only on the subjective sub-criteria, with explicit acknowledgement)
 - Any director returns CONCERNS → verdict is minimum CONCERNS
 - All four READY → eligible for PASS (still subject to artifact and quality checks from Section 3)
 
@@ -386,7 +395,10 @@ Art Director:       [READY / CONCERNS / NOT READY]
 
 ## 5a. Chain-of-Verification
 
-After drafting the verdict in Phase 5, challenge it before finalising.
+After drafting the verdict in Phase 5, challenge it before finalising. This runs as an
+**automated re-check** (file re-verification pass) — no human turn; the [TOOL ACTION]
+requirement below forces the challenge to re-read specific files / re-run specific checks
+rather than asking the user.
 
 **Step 1 — Generate 5 challenge questions** designed to disprove the verdict:
 

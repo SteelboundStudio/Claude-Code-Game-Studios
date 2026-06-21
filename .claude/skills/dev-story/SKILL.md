@@ -84,16 +84,17 @@ Read `docs/architecture/control-manifest.md`. Extract the rules for this story's
 - Performance guardrails
 
 Check: does the story's embedded Manifest Version match the current manifest header date?
-If they differ, use `AskUserQuestion` before proceeding:
-- Prompt: "Story was written against manifest v[story-date]. Current manifest is v[current-date]. New rules may apply. How do you want to proceed?"
-- Options:
-  - `[A] Update story manifest version and implement with current rules (Recommended)`
-  - `[B] Implement with old rules — I accept the risk of non-compliance`
-  - `[C] Stop here — I want to review the manifest diff first`
+If they differ, always implement against the **current** manifest rules — do not pause
+(manifest-version diff + rule-apply check). The current manifest is always authoritative;
+proceeding with stale rules is never the right default.
 
-If [A]: edit the story file's `Manifest Version:` field to the current manifest date before spawning the programmer. Then read the manifest carefully for new rules.
-If [B]: edit the story file's `Manifest Version:` field to the current manifest date AND add a `Manifest-Note: Proceeded with old manifest rules on [date] — non-compliance risk accepted.` line to the story header. Read the manifest for new rules anyway. Note the decision in the Phase 6 summary under "Deviations". `/story-done` will include the Manifest-Note in its deviations section without re-checking staleness.
-If [C]: stop. Do not spawn any agent. Let the user review and re-run `/dev-story`.
+Auto-resolve:
+- Edit the story file's `Manifest Version:` field to the current manifest date before
+  spawning the programmer, and read the current manifest carefully for new rules.
+- Log the version bump in the Phase 6 summary under "Deviations": "Story manifest
+  version was v[story-date]; updated to current v[current-date] and implemented against
+  current rules." If any current rule would have been violated by the old approach,
+  surface it in the summary — log non-compliance, do not silently skip it.
 
 ### Dependency validation
 
@@ -101,16 +102,18 @@ After extracting the **Dependencies** list from the story file, validate each:
 
 1. Glob `production/epics/**/*.md` to find each dependency story file.
 2. Read its `Status:` field.
-3. If any dependency has Status other than `Complete` or `Done`:
-   - Use `AskUserQuestion`:
-     - Prompt: "Story '[current story]' depends on '[dependency title]' which is currently [status], not Complete. How do you want to proceed?"
-     - Options:
-       - `[A] Proceed anyway — I accept the dependency risk`
-       - `[B] Stop — I'll complete the dependency first`
-       - `[C] The dependency is done but status wasn't updated — mark it Complete and continue`
-   - If [B]: set story status to **BLOCKED** in session state and stop. Do not spawn any programmer agent.
-   - If [C]: ask "May I update [dependency path] Status to Complete?" before continuing.
-   - If [A]: note in Phase 6 summary under "Deviations": "Implemented with incomplete dependency: [dependency title] — [status]."
+3. If any dependency has Status other than `Complete` or `Done`, auto-resolve by
+   dependency hardness (dependency-status check):
+   - **Hard dependency** (the story's `Depends on:` entry, i.e. the dependency must be
+     DONE first): auto-block — set story status to **BLOCKED** in session state and stop.
+     Do not spawn any programmer agent. Report: "BLOCKED: hard dependency '[dependency
+     title]' is [status], not Complete. Complete it first, then re-run `/dev-story`."
+   - **Soft dependency** (listed as enhancing/optional, not a hard prerequisite): proceed
+     automatically and note in the Phase 6 summary under "Deviations": "Implemented with
+     incomplete soft dependency: [dependency title] — [status]."
+   - If a dependency is clearly done but its status field was simply not updated (the
+     dependency story's acceptance criteria are all checked / it has a closure record),
+     auto-correct its `Status` to Complete and continue, noting the correction.
 
 If a dependency file cannot be found: warn "Dependency story not found: [path]. Verify the path or create the story file."
 
@@ -297,7 +300,12 @@ Common blockers:
 
 ## Collaborative Protocol
 
-- **File writes are delegated** — all source code, test files, and evidence docs are written by sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?" protocol individually. This orchestrator does not write files directly.
+- **File writes are delegated and automatic** — all source code, test files, and evidence
+  docs are written by sub-agents spawned via Task. Sub-agents auto-write into their
+  delegated directories (`src/`, `tests/`, `production/qa/evidence/`) without a per-file
+  "May I write to [path]?" pause. The guards are: a path-allowlist (writes must stay
+  within the delegated directories and the story's in-scope files) and tests-must-pass
+  (the CI blocking gate / re-run in `/story-done`). This orchestrator does not write files directly.
 - **Load before implementing** — do not start coding until all context is loaded
   (story, TR-ID, ADR, manifest, engine prefs). Incomplete context produces code
   that drifts from design.

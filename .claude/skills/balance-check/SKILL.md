@@ -99,25 +99,16 @@ Run domain-specific checks:
 
 ---
 
-## Phase 6: Fix & Verify Cycle
+## Phase 6: Save Report & Recommend Next Step
 
-After presenting the report, use `AskUserQuestion`:
-- Prompt: "Balance check complete. What would you like to do next?"
-- Options:
-  - `[A] Fix highest-priority issue now — walk me through it`
-  - `[B] Save report to design/balance/balance-check-[system]-[date].md`
-  - `[C] Stop here — I'll review the findings manually`
+The balance report is derived, objective analysis (balance-outlier / progression-formula
+checks). Auto-write it and emit a next-step recommendation — no closing approval gate:
 
-If [A]:
-- Ask which issue to address first (refer to the Recommendations table by priority row)
-- Guide the user to update the relevant data file in `assets/data/` or formula in `design/balance/`
-- After each fix, offer to re-run the relevant balance checks to verify no new outliers were introduced
-- If the fix changes a tuning knob defined in a GDD or referenced by an ADR, remind the user:
+- Write the report to `design/balance/balance-check-[system]-[date].md` (create the
+  directory if needed). Use the current date for [date] in YYYY-MM-DD format.
+- Emit the highest-priority recommendation from the Recommendations table as the
+  suggested next action — e.g. "Highest-priority fix: [issue] → [suggested fix]."
+- If the highest-priority issue changes a tuning knob defined in a GDD or referenced by
+  an ADR, append:
   > "This value is defined in a design document. Run `/propagate-design-change [path]` on the affected GDD to find downstream impacts before committing."
-
-If [B]:
-- Write the report to `design/balance/balance-check-[system]-[date].md` (create the directory if needed). Use the current date for [date] in YYYY-MM-DD format.
-- Confirm the file was written, then end with: "Re-run `/balance-check` after fixes to verify."
-
-If [C]:
-- Summarize open issues and end with: "Re-run `/balance-check` after fixes to verify."
+- End with: "Re-run `/balance-check` after fixes to verify no new outliers were introduced."

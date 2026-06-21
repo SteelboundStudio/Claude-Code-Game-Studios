@@ -186,7 +186,9 @@ Approaching **[next phase]** gate → run `/gate-check` when ready.
 - `~` for optional steps available now
 - Show commands inline as backtick code
 - If a step has no command (e.g. "Implement Stories"), explain what to do instead of showing a slash command
-- For MANUAL steps, ask the user: "I can't tell if [step] is done — has it been completed?"
+- For MANUAL steps, first try to infer completion from artifacts (artifact-state detection) —
+  if any file or pattern indicates the step is done, mark it complete automatically. Only flag
+  the truly undetectable ones: "I can't detect whether [step] is done from any artifact — confirm if it's complete."
 
 Verdict: **COMPLETE** — next steps identified.
 
@@ -221,7 +223,8 @@ Only show this if the user's input suggested confusion (e.g. "I don't know", "st
 ## Collaborative Protocol
 
 - **Never auto-run the next skill.** Recommend it, let the user invoke it.
-- **Ask about MANUAL steps** rather than assuming complete or incomplete.
+- **Infer MANUAL steps from artifacts where detectable** (artifact-state detection); only
+  ask the user about steps that no artifact can confirm.
 - **Match the user's tone** — if they sound stressed ("I'm totally lost"), be
   reassuring and give one action, not a list of six.
 - **One primary recommendation** — the user should leave knowing exactly one thing

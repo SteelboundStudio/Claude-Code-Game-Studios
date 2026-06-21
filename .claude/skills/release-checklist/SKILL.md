@@ -170,9 +170,15 @@ resolution and estimated time to address them.]
 
 Present the checklist to the user with: total checklist items, number of known blockers (FIXME/HACK counts, known bugs).
 
-Ask: "May I write this to `production/releases/release-checklist-[version].md`?"
+Auto-write the checklist to `production/releases/release-checklist-[version].md`,
+creating the directory if needed — the checklist is generated deterministically
+from the TODO/FIXME/HACK scan and the milestone, so no approval gate is required.
+The Go/No-Go verdict and the named sign-offs in the generated checklist remain a
+human decision (release authorization); only the file write is automated.
 
-If yes, write the file, creating the directory if needed.
+**Replacement check (schema):** before declaring the write complete, verify all
+platform sections required by the argument are present and the TODO/FIXME/HACK
+counts are populated.
 
 ---
 

@@ -91,10 +91,16 @@ The level-designer should:
 - Define points of interest and landmarks for wayfinding — these must match the visual landmarks the art-director specified
 - Specify entry/exit points and connections to adjacent areas
 
-**Adjacent area dependency check**: After the layout is produced, check `design/levels/` for each adjacent area referenced by the level-designer. If any referenced area's `.md` file does not exist, surface the gap:
+**Adjacent area dependency check** (objective file-existence check — runs
+automatically, no human gate): After the layout is produced, check `design/levels/`
+for each adjacent area referenced by the level-designer. If any referenced area's
+`.md` file does not exist, auto-surface the gap (Replacement check: file-existence
+check for every adjacency):
 > "Level references [area-name] as an adjacent area but `design/levels/[area-name].md` does not exist."
 
-Use `AskUserQuestion` with options:
+The detection is automatic; only the resolution choice (proceed with placeholder
+vs. pause to design the adjacent area) is a human decision. Use `AskUserQuestion`
+with options:
 - (a) Proceed with a placeholder reference — mark the connection as UNRESOLVED in the level doc and list it in the open cross-level dependencies section of the summary report
 - (b) Pause and run `/team-level [area-name]` first to establish that area
 
@@ -132,7 +138,15 @@ Spawn the `accessibility-specialist` agent in parallel to:
 
 Wait for both agents to return before proceeding.
 
-**Gate**: Use `AskUserQuestion` to present both Step 4 results. If the accessibility-specialist returned any BLOCKING concerns, highlight them prominently and offer:
+**Accessibility flagging is rule-based and automatic** (no human gate to detect):
+BLOCKING concerns are flagged by objective rules — color-only critical path,
+contrast below the accessibility tier, >3 simultaneous cognitive states.
+(Replacement check: accessibility rule checks — contrast, color-independence,
+≤3 simultaneous states.)
+
+**Gate (human — resolution choice only)**: Use `AskUserQuestion` to present both
+Step 4 results. If any BLOCKING concern was auto-flagged, highlight it prominently
+and offer the redesign-vs-proceed decision (this is the human call):
 - (a) Return to level-designer and art-director to redesign the flagged elements before Step 5
 - (b) Document as a known accessibility gap and proceed to Step 5 with the concern explicitly logged in the final report
 

@@ -14,7 +14,7 @@ narrative and gameplay purposes.
 
 ### Collaboration Protocol
 
-**You are a collaborative implementer, not an autonomous code generator.** The user approves all architectural decisions and file changes.
+**You are a collaborative creative consultant, not an autonomous generator.** Player-facing written content is creative work — the user approves all narrative/voice/content decisions and file changes.
 
 #### Implementation Workflow
 

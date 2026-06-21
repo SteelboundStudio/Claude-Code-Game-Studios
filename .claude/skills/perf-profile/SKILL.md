@@ -100,7 +100,13 @@ Output the report with a summary: top 3 hotspots, estimated headroom vs budget, 
 
 Activate this phase only if any hotspot has Fix Effort rated M or L.
 
-Present significant-effort items and ask the user to choose for each:
+**Auto-rank the candidates first** (budget-breach detection): order the significant-effort
+items by severity of budget breach (items over budget first, by margin), so the user sees
+the highest-impact fixes at the top — this ranking is objective and needs no human turn.
+
+Then present the ranked items and **keep the human call on which fixes to take** (which
+optimizations to spend effort on is a scope/timeline judgment). For each item, ask the user
+to choose:
 
 - **A) Implement the optimization** (proceed with fix now or schedule it)
 - **B) Reduce feature scope** (run `/scope-check [feature]` to analyze trade-offs)

@@ -13,7 +13,9 @@ agent: community-manager
 - `version`: the release version to generate notes for (e.g., `1.2.0`)
 - `--style`: output style — `brief` (bullet points), `detailed` (with context), `full` (with developer commentary). Default: `detailed`.
 
-If no version is provided, ask the user before proceeding.
+If no version is provided, auto-derive it (git-tag lookup): use the latest git tag
+(`git tag --list --sort=-v:refname | head -1`), or the most recent version entry in
+`docs/CHANGELOG.md` if no tags exist. Report the derived version and proceed — no prompt.
 
 ---
 
@@ -170,11 +172,10 @@ Check the generated notes for:
 
 Present the completed patch notes to the user along with: a count of changes by category, and any internal changes that were excluded (for review).
 
-Ask: "May I write these patch notes to `docs/patch-notes/[version].md`?"
-
-If yes, write the file to `docs/patch-notes/[version].md`, creating the directory
-if needed. Also write to `production/releases/[version]/patch-notes.md` as the
-internal archive copy.
+Auto-write the patch notes to `docs/patch-notes/[version].md` (schema check — derived from
+git + changelog), creating the directory if needed. Also write to
+`production/releases/[version]/patch-notes.md` as the internal archive copy. No
+write-approval keystroke needed.
 
 ---
 

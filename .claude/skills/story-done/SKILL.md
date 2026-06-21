@@ -244,10 +244,16 @@ Pass:
 
 The qa-lead reviews whether the tests actually cover what was specified — not just whether files exist.
 
-Apply the verdict:
+Apply the verdict (objective coverage check — no human pause):
 - **ADEQUATE** → proceed to Phase 5
-- **GAPS** → flag as **ADVISORY**: "QA lead identified coverage gaps: [list]. Story can complete but gaps should be addressed in a follow-up story."
-- **INADEQUATE** → flag as **BLOCKING**: "QA lead: critical logic is untested. Verdict cannot be COMPLETE until coverage improves. Specific gaps: [list]."
+- **GAPS** (soft concerns) → auto-proceed **with a logged rationale**: flag as
+  **ADVISORY** and record in Completion Notes — "QA lead identified coverage gaps:
+  [list]. Story proceeds; gaps logged for a follow-up story." Does not pause for
+  human approval.
+- **INADEQUATE** (objective coverage failure) → auto-**BLOCKING**: "QA lead:
+  critical logic is untested. Verdict cannot be COMPLETE until coverage improves.
+  Specific gaps: [list]." This hard-blocks the COMPLETE verdict; no human override
+  at this step.
 
 Skip this phase for Config/Data stories (no code tests required).
 
@@ -255,24 +261,31 @@ Skip this phase for Config/Data stories (no code tests required).
 
 ## Phase 5: Lead Programmer Code Review Gate
 
-**Review mode check** — apply before spawning LP-CODE-REVIEW:
-- `solo` → skip. Note: "LP-CODE-REVIEW skipped — Solo mode." Proceed to Phase 6 (completion report).
-- `lean` → use `AskUserQuestion` before proceeding:
-  - Prompt: "Code review is skipped in lean mode. Did you run `/code-review` on the implemented files?"
-  - Options:
-    - `Yes — /code-review passed or was approved with suggestions`
-    - `No — skipping code review for this story`
-    - `No — I'll run /code-review before the sprint close-out`
-  - Record the answer in the completion notes (Phase 7). All three options proceed to Phase 6.
-- `full` → spawn as normal.
+This gate has two parts: an **objective static-analysis/lint pass** (always runs,
+auto-blocking) and a **design-intent review** (human, reserved for the "is this the
+right abstraction" judgment).
 
-Spawn `lead-programmer` via Task using gate **LP-CODE-REVIEW** (`.claude/docs/director-gates.md`).
+**Objective lint/static-analysis (BLOCKING — runs in all modes, no human gate):**
+Run the project's linter / static-analysis ruleset over the implementation files
+(engine-appropriate — e.g., GDScript static typing/lint, C# analyzers). Treat
+lint/static-analysis failures as **BLOCKING**: the COMPLETE verdict in Phase 6
+cannot be reached until they are resolved. This is computed, not gated on a human
+ask. (Replacement check: zero lint/static-analysis errors over the changed files.)
 
-Pass: implementation file paths, story file path, relevant GDD section, governing ADR.
+**Design-intent review (human judgment — review-mode dependent):**
+- `solo` → skip. Note: "Design-intent review skipped — Solo mode." Proceed to Phase 6.
+- `lean` → skip the spawned director review (not a PHASE-GATE). Note: "Design-intent
+  review skipped — Lean mode (objective lint gate still enforced)." Proceed to Phase 6.
+- `full` → spawn `lead-programmer` via Task using gate **LP-CODE-REVIEW**
+  (`.claude/docs/director-gates.md`). Pass: implementation file paths, story file
+  path, relevant GDD section, governing ADR.
 
-Present the verdict to the user. If CONCERNS, surface them via `AskUserQuestion`:
+In `full` mode, the human review covers ONLY design-intent concerns (abstraction
+choices, architectural fit) — objective code issues are already caught by the lint
+gate above. Present the verdict. If CONCERNS (design-intent), surface them via
+`AskUserQuestion`:
 - Options: `Revise flagged issues` / `Accept and proceed` / `Discuss further`
-If REJECT, do not proceed to Phase 6 verdict until the issues are resolved.
+If REJECT (design-intent), do not proceed to Phase 6 verdict until resolved.
 
 If the story has no implementation files yet (verdict is being run before coding is done), skip this phase and note: "LP-CODE-REVIEW skipped — no implementation files found. Run after implementation is complete."
 
@@ -329,17 +342,27 @@ fixed. Offer to help fix the blocking items.
 
 ## Phase 7: Update Story Status
 
-Use `AskUserQuestion` before writing anything:
-- Prompt: "Verification complete. How do you want to proceed?"
+**Clean-COMPLETE path (auto-close, no human gate):** if the Phase 6 verdict is
+**COMPLETE** with all acceptance criteria passing and **zero advisory or blocking
+deviations**, auto-close the story: edit the story file (status + Last-Updated +
+Completion Notes) and update `sprint-status.yaml` without prompting. The closing
+write is mechanical once the objective verdict is clean. (Replacement check: all
+ACs pass AND no blocking deviation → auto status:done.)
+
+**Deviation path (human decision required):** if there are advisory deviations to
+accept/defer (the verdict is COMPLETE WITH NOTES), use `AskUserQuestion` —
+accepting or deferring deviations is a judgment the user owns:
+- Prompt: "Verification complete with advisory deviations. How do you want to proceed?"
 - Options:
-  - `Close the story — update file, mark Complete, log notes (Recommended)`
+  - `Close the story — accept deviations as-is, update file, mark Complete`
   - `Close and log advisory deviations as tech debt in docs/tech-debt-register.md`
   - `There are issues I want to fix first — don't close yet`
-  - `Accept deviations as-is and close anyway`
 
-If "Close", "Close and log tech debt", or "Accept deviations": edit the story file.
+If "Close" or "Close and log tech debt": edit the story file.
 If "Close and log tech debt": after updating the story file, also append the advisory deviations to `docs/tech-debt-register.md` (create the file if it does not exist).
 If "Fix first": stop here and list what the user flagged. Do not write any files.
+
+(A **BLOCKED** verdict never reaches this phase — Phase 6 halts on blocking items.)
 
 1. Update the status field: `Status: Complete`
 2. Update the `Last Updated:` field in the story header to today's date (format: `YYYY-MM-DD`). If the field does not exist, add it after the `Status:` line.
@@ -440,15 +463,18 @@ If no more stories are ready but Must Have stories are still In Progress (not Co
 
 ## Collaborative Protocol
 
-- **Never mark a story complete without user approval** — Phase 7 requires an
-  explicit "yes" before any file is edited.
+- **Clean COMPLETE auto-closes** — when all ACs pass with zero deviations, Phase 7
+  closes the story automatically (the objective verdict is the gate). A human
+  accept/defer decision is required ONLY when advisory deviations exist.
 - **Never auto-fix failing criteria** — report them and ask what to do.
 - **Deviations are facts, not judgments** — present them neutrally; the user
-  decides if they are acceptable.
-- **BLOCKED verdict is advisory** — the user can override and mark complete
-  anyway; document the risk explicitly if they do.
-- Use `AskUserQuestion` for the code review prompt and for batching manual
-  criteria confirmations.
+  decides if advisory deviations are acceptable.
+- **Objective gates are auto-blocking** — test-evidence gaps, INADEQUATE coverage,
+  and lint/static-analysis failures hard-block the COMPLETE verdict; they are not
+  gated on a human ask.
+- Use `AskUserQuestion` for the design-intent code review concerns (full mode), the
+  deviation accept/defer decision, and for batching subjective manual criteria
+  confirmations.
 
 ---
 

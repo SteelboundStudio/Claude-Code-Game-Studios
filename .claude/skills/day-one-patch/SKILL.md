@@ -90,9 +90,13 @@ Spawn `release-manager` via Task. Ask them to produce a rollback plan covering:
 - Who is responsible for triggering the rollback
 - What player communication is required if a rollback occurs
 
-Present the rollback plan. Ask: "May I write this rollback plan to `production/releases/rollback-plan-[version].md`?"
+Present the rollback plan, then auto-write it to
+`production/releases/rollback-plan-[version].md` (template-driven; the plan is derived
+output, so the write is mechanical). No write-approval keystroke needed.
 
-Do not proceed to Phase 4 until the rollback plan is written.
+**The must-exist gate stays**: do not proceed to Phase 4 until the rollback plan is
+written (rollback-plan-present blocking check) — a patch without a written rollback plan
+is blocked.
 
 ---
 
@@ -128,7 +132,10 @@ Run the required QA scope:
 - **Targeted smoke check** — run `/smoke-check [affected-systems]`
 - **Broader regression** — run targeted tests in `tests/unit/` and `tests/integration/` for affected systems
 
-QA verdict must be PASS or PASS WITH WARNINGS before proceeding. If FAIL: scope the failing fix out of the day-one patch and defer to 1.1.
+Gate on the automated QA result (smoke-check / team-qa PASS gate): the verdict must be
+PASS or PASS WITH WARNINGS before proceeding — this is computed from the smoke-check /
+team-qa output, no human approval turn. If FAIL: auto-scope the failing fix out of the
+day-one patch and defer to 1.1.
 
 ---
 

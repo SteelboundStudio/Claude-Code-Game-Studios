@@ -121,7 +121,11 @@ Once the engine is chosen:
 - If version was provided, use it
 - If no version provided, use WebSearch to find the latest stable release:
   - Search: `"[engine] latest stable version [current year]"`
-  - Confirm with the user: "The latest stable [engine] is [version]. Use this?"
+  - Auto-accept the WebSearch-confirmed latest stable version without prompting,
+    and report it: "Using the latest stable [engine]: [version] (confirmed via
+    WebSearch)." (Replacement check: the version must be verified against the
+    WebSearch result, never guessed — if WebSearch is ambiguous or unavailable,
+    surface that and ask the user to confirm.)
 
 ---
 
@@ -143,10 +147,12 @@ Record the choice. It determines the CLAUDE.md template, naming conventions, spe
 
 ---
 
-Read `CLAUDE.md` and show the user the proposed Technology Stack changes.
-Ask: "May I write these engine settings to `CLAUDE.md`?"
+Read `CLAUDE.md`, show the user the proposed Technology Stack changes, then
+auto-write them — once the engine, version, and language decisions are made, the
+derived config is mechanical, so no approval gate is required.
 
-Wait for confirmation before making any edits.
+**Replacement check (post-write validation):** after writing, verify all `[CHOOSE]`
+placeholders in the Technology Stack section are replaced with the actual values.
 
 Update the Technology Stack section, replacing the `[CHOOSE]` placeholders with the actual values:
 
@@ -217,7 +223,10 @@ For **Primary Input**, use the dominant input for the game genre:
 - Mobile game → Touch
 - Cross-platform → ask the user
 
-Present the derived values and ask the user to confirm or adjust before writing.
+Auto-write the derived Input & Platform values (they are computed from the
+platform-target mapping above and the genre). Present the derived values for
+visibility, but do not gate the write on approval. (Replacement check: the
+written values must match the platform→support mapping table.)
 
 Example filled section:
 ```markdown
@@ -298,7 +307,11 @@ Present the filled-in preferences to the user. For Godot, include the chosen lan
 
 For all other engines, present the defaults directly without referencing the appendix.
 
-Wait for approval before writing the file.
+Auto-write the technical-preferences file — the engine/naming/routing defaults are
+derived from the engine and language choices, so no approval gate is required.
+(The Performance Budgets prompt above remains the one human decision, since budget
+targets are hardware-dependent taste.) Replacement check: the written routing
+table matches the chosen engine and language.
 
 ---
 
@@ -364,9 +377,12 @@ Create the full reference doc set by searching the web:
    - Deprecated APIs with replacements
    - New features and best practices
 
-Ask: "May I create the engine reference docs under `docs/engine-reference/<engine>/`?"
-
-Wait for confirmation before writing any files.
+Auto-create the engine reference docs under `docs/engine-reference/<engine>/` —
+they are derived from WebSearch results and the version/cutoff comparison, so no
+approval gate is required. (Replacement check: VERSION.md risk level is computed
+from the cutoff table; reference files carry a "Last verified: [date]" header.)
+The no-overwrite guard in the Guardrails still applies — existing reference docs
+for a different engine are not replaced without asking.
 
 3. **Create the full reference directory**:
    ```
@@ -389,10 +405,9 @@ Wait for confirmation before writing any files.
 
 ## 8. Update CLAUDE.md Import
 
-Ask: "May I update the `@` import in `CLAUDE.md` to point to the new engine reference?"
-
-Wait for confirmation, then update the `@` import under "Engine Version Reference" to point to the
-correct engine:
+Auto-update the `@` import in `CLAUDE.md` under "Engine Version Reference" to point
+to the correct engine — this is a mechanical config write. (Replacement check: the
+import path resolves to the chosen engine's VERSION.md.)
 
 ```markdown
 ## Engine Version Reference
@@ -407,7 +422,9 @@ Godot to Unity), update it.
 
 ## 9. Update Agent Instructions
 
-Ask: "May I add a Version Awareness section to the engine specialist agent files?" before making any edits.
+Auto-add a Version Awareness section to the engine specialist agent files — this
+is a derived config write. (Replacement check: each chosen-engine specialist agent
+has a Version Awareness section after the write.)
 
 For the chosen engine's specialist agents, verify they have a
 "Version Awareness" section. If not, add one following the pattern in

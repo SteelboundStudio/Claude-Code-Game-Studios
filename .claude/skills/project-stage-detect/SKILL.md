@@ -130,9 +130,12 @@ If user provided a role argument (e.g., `/project-stage-detect programmer`):
 - Holistic view of all gaps
 - Highest-priority items across domains
 
-### 6. Request Approval Before Writing
+### 6. Write the Stage Analysis
 
-**Collaborative protocol**:
+This is a read-only diagnostic with objective stage detection — auto-write the report
+(artifact-presence stage-detection check). Present the summary, then write the full stage
+analysis to `production/project-stage-report.md` automatically. No write-approval keystroke needed.
+
 ```
 I've analyzed your project. Here's what I found:
 
@@ -147,10 +150,8 @@ Recommended next steps:
 - [Priority 2]
 - [Priority 3]
 
-May I write the full stage analysis to production/project-stage-report.md?
+Stage analysis written to production/project-stage-report.md.
 ```
-
-Wait for user approval before creating the file.
 
 ---
 
@@ -188,8 +189,11 @@ This skill follows the collaborative design principle:
 
 1. **Question First**: Ask about gaps, don't assume
 2. **Present Options**: "Should I create X, or is it tracked elsewhere?"
-3. **User Decides**: Wait for direction
+3. **User Decides**: Wait for direction on gap resolution
 4. **Show Draft**: Display report summary
-5. **Get Approval**: "May I write to production/project-stage-report.md?"
+5. **Auto-write the diagnostic**: the stage report is read-only objective analysis
+   (artifact-presence stage-detection check) — write it automatically after showing findings
 
-**Never** silently write files. **Always** show findings and ask before creating artifacts.
+**Always** show findings before writing the report. The stage report itself is a derived
+diagnostic and is written automatically; any *follow-up artifacts* (new GDDs, ADRs, etc.)
+still require the user's direction per the gap-identification questions above.

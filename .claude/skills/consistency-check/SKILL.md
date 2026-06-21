@@ -284,16 +284,15 @@ Silently append to `production/session-state/active.md` (create the file if it d
 <!-- CONSISTENCY-CHECK: [date] | GDDs checked: [N] | Conflicts found: [N] | Report: docs/consistency-report-[date].md -->
 ```
 
-Then close with an `AskUserQuestion` widget:
+Then emit the computed verdict and next-step recommendation directly (entity-registry
+cross-ref check — the verdict is objective: registry vs GDD scan). No closing approval
+widget:
 
-- **Prompt**: "Consistency check complete — [N] conflicts found. What next?"
-- **Options**:
-  - `[A] Fix the highest-priority conflict now`
-  - `[B] Save full report and stop`
-  - `[C] Run /design-review on the most conflicted GDD`
-  - `[D] Stop here`
-
-Never end the skill with plain text. Always close with this widget.
+- If CONFLICTS FOUND: "Consistency check complete — [N] conflicts found. Fix the
+  highest-priority conflict, then re-run `/consistency-check` to confirm resolution.
+  Architecture is blocked until conflicts are resolved (see Phase 6)."
+- If PASS: "Consistency check complete — no conflicts. Run `/review-all-gdds` or
+  `/create-architecture` next."
 
 ---
 

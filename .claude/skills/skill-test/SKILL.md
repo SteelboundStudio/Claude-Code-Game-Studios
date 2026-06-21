@@ -67,14 +67,31 @@ The skill must contain at least one of: `PASS`, `FAIL`, `CONCERNS`, `APPROVED`,
 
 **FAIL** if none are present.
 
-### Check 4 — Collaborative Protocol Language
-The skill must contain ask-before-write language. Look for:
-- `"May I write"` (canonical form)
-- `"before writing"` or `"approval"` near file-write instructions
-- `"ask"` + `"write"` in close proximity (within same section)
+### Check 4 — Write-Gate Policy (artifact-typed)
+The studio is human-in-the-loop on CREATIVE/JUDGMENT work and autonomous on TECHNICAL work.
+The correct write-gate depends on what the skill writes. First classify the skill's primary
+written artifact:
 
-**WARN** if absent (some read-only skills legitimately skip this).
-**FAIL** if `allowed-tools` includes `Write` or `Edit` but no ask-before-write language is found.
+- **CREATIVE / JUDGMENT skill** — authors `design/**`, art bibles, asset specs, UX specs,
+  narrative/lore, ADR rationale, or produces a taste verdict (PROCEED·PIVOT·KILL, go/no-go,
+  "feels good"). Examples: `design-system`, `art-bible`, `ux-design`, `brainstorm`, `quick-design`,
+  `reverse-document`, `map-systems`, the creative phases of `team-*`.
+- **TECHNICAL / MECHANICAL skill** — writes code/tests/config, or a derived/computed report,
+  register, status update, or schema-validated artifact. Examples: `changelog`, `bug-report`,
+  `security-audit`, `tech-debt`, `story-done`, `create-stories`, `consistency-check`.
+
+Then check:
+- **CREATIVE/JUDGMENT skill** → MUST contain ask-before-write / approval language
+  (`"May I write"`, `"before writing"`, `"approval"`, or `"ask"`+`"write"` in proximity).
+  **FAIL** if `allowed-tools` includes `Write`/`Edit` but no approval gate is present.
+- **TECHNICAL/MECHANICAL skill** → MUST auto-write (no human approval turn) and SHOULD name a
+  **replacement check** near the write (e.g., "schema check", "traceability check",
+  "append-only diff guard", "tests-must-pass"). **FAIL** if a stale `"May I write"` human gate
+  remains on a purely mechanical/derived write. **WARN** if it auto-writes but names no replacement check.
+- **Read-only skill** (no `Write`/`Edit` in `allowed-tools`) → neither is required. **PASS**.
+
+**Never** treat `solo`/`lean` review mode as the replacement for a verification gate — verification
+must be a real check, not a skipped one.
 
 ### Check 5 — Next-Step Handoff
 The skill must end with a recommended next action or follow-up path. Look for:
@@ -170,11 +187,12 @@ Mark each assertion:
 - **PARTIAL** — skill instructions partially address it, but with ambiguity
 - **FAIL** — skill instructions would NOT satisfy this assertion given the fixture
 
-For **Protocol Compliance** assertions (always present):
-- Check whether the skill requires "May I write" before file writes
-- Check whether the skill presents findings before requesting approval
-- Check whether the skill ends with a recommended next step
-- Check whether the skill avoids auto-creating files without approval
+For **Protocol Compliance** assertions (always present) — artifact-typed (see Check 4):
+- **Creative/judgment skill**: requires "May I write" / approval before writing creative artifacts;
+  presents options before the human decides; avoids auto-creating creative files without approval.
+- **Technical/mechanical skill**: auto-writes derived/code artifacts WITHOUT a human approval turn,
+  and names a replacement check (schema/tests/traceability/append-only) in place of the human gate.
+- Both: the skill ends with a recommended next step.
 
 ### Step 4 — Build Report
 
@@ -195,24 +213,26 @@ Case 2: [Edge Case — name]
   ...
   Case Verdict: PASS
 
-Protocol Compliance:
-  [PASS] Uses "May I write" before file writes
-  [PASS] Presents findings before asking approval
+Protocol Compliance (artifact-typed):
+  [PASS] Technical skill: auto-writes with replacement check (no human gate) — correct
+  [PASS] (or, for creative skills) Uses "May I write" before file writes
   [WARN] No explicit next-step handoff at end
 
 Overall Verdict: FAIL (1 case failed, 1 warning)
 ```
 
-### Step 5 — Offer to Write Results
+### Step 5 — Write Results
 
-"May I write these results to `CCGS Skill Testing Framework/results/skill-test-spec-[name]-[date].md`
-and update `CCGS Skill Testing Framework/catalog.yaml`?"
+Auto-write the test artifacts — the spec verdicts are objective assertion checks,
+so no approval gate is required:
 
-If yes:
-- Write results file to `CCGS Skill Testing Framework/results/`
+- Write results file to `CCGS Skill Testing Framework/results/skill-test-spec-[name]-[date].md`
 - Update the skill's entry in `CCGS Skill Testing Framework/catalog.yaml`:
   - `last_spec: [date]`
   - `last_spec_result: PASS|PARTIAL|FAIL`
+
+**Replacement check:** the catalog update overwrites only the known `last_spec`
+fields, and the results file matches the report template.
 
 ---
 
@@ -265,10 +285,12 @@ Fix: Add TD-PHASE-GATE, PR-PHASE-GATE, and AD-PHASE-GATE to the full-mode direct
      panel in Phase 3.
 ```
 
-### Step 6 — Offer to Update Catalog
+### Step 6 — Update Catalog
 
-"May I update `CCGS Skill Testing Framework/catalog.yaml` to record this category check
-(`last_category`, `last_category_result`) for [name]?"
+Auto-update `CCGS Skill Testing Framework/catalog.yaml` to record this category
+check (`last_category`, `last_category_result`) for [name] — the category verdict
+is an objective rubric check, so no approval gate is required. (Replacement check:
+only the known `last_category` fields are overwritten.)
 
 ---
 

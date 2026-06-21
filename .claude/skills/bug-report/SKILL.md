@@ -137,13 +137,10 @@ After closing, check `production/qa/bug-triage-*.md` — if the bug appears in a
 
 ## Phase 3: Save Report
 
-Present the completed bug report(s) to the user.
-
-Ask: "May I write this to `production/qa/bugs/BUG-[NNNN].md`?"
-
-If yes, write the file, creating the directory if needed. Verdict: **COMPLETE** — bug report filed.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Present the completed bug report(s) to the user, then auto-file each to
+`production/qa/bugs/BUG-[NNNN].md` (bug-template schema check: repro steps, severity,
+and context present) — the bug report is structured derived output, so the write is
+mechanical. Create the directory if needed. Verdict: **COMPLETE** — bug report filed.
 
 ---
 

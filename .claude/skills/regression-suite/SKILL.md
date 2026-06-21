@@ -36,12 +36,11 @@ and known failure points. This skill maintains that list.
   existing test coverage; flag paths with no regression test
 - `/regression-suite report` — read-only status report (no writes); suitable
   for sprint reviews
-- No argument — if a sprint is clearly active (sprint plan exists with in-progress stories), run `update`. If ambiguous or no active sprint is detected, use `AskUserQuestion`:
-  - Prompt: "No subcommand specified. Which mode do you want to run?"
-  - Options:
-    - `[A] update — scan new bug fixes this sprint and add missing regression tests`
-    - `[B] audit — full audit of all GDD critical paths vs. existing test coverage`
-    - `[C] report — read-only status report (no writes)`
+- No argument — resolve the mode deterministically without prompting: if a sprint
+  is active (sprint plan exists with in-progress stories), run `update`; if no
+  active sprint is detected, run `audit`; `report` is the read-only fallback when
+  neither writes are appropriate. (Replacement check: mode resolves
+  deterministically; no write occurs in `report` mode.)
 
 ---
 
@@ -222,15 +221,21 @@ Tests that are flaky or disabled (do not run in CI):
 
 ## 7. Write Output
 
-Ask: "May I write/update `tests/regression-suite.md` with the current
-regression suite manifest?"
+Auto-write/update `tests/regression-suite.md` with the current regression suite
+manifest — the manifest is computed from globbed test files and closed bugs, so
+no approval gate is required.
 
 For `update` mode: append new entries; never remove existing entries
 (use `Edit` with targeted insertions).
 For `audit` mode: rewrite the full manifest with updated coverage data.
 For `report` mode: do not write anything.
 
-After writing (if approved):
+**Replacement check (manifest integrity):** existing entries must be preserved —
+run an append-only diff guard that forbids deletion of any existing manifest line
+(removals are programmatically rejected, never resolved by asking; quarantine is
+not deletion). Recompute coverage % from the globbed test files before writing.
+
+After writing:
 
 - For each HIGH priority gap: "Consider creating the missing regression test
   before the next sprint. Run `/test-helpers` to scaffold the test file."
@@ -239,18 +244,19 @@ After writing (if approved):
 - If coverage drift detected: "Regression suite may be drifting. Consider
   running `/regression-suite audit` at the next sprint boundary."
 
-Verdict: **COMPLETE** — regression suite updated. (If user declined write: Verdict: **BLOCKED**.)
+Verdict: **COMPLETE** — regression suite updated.
 
 ---
 
 ## Collaborative Protocol
 
-- **Never remove existing regression tests from the manifest** without
-  explicit user approval — removing a test that was deliberately written is a
-  regression risk itself
+- **Never remove existing regression tests from the manifest** — this is encoded
+  as a hard append-only diff guard in the writer; manifest line deletions are
+  programmatically forbidden, not gated on a human ask
 - **Gaps are advisory, not blocking** — surface them clearly but do not prevent
   other work from proceeding (except at release gate where regression suite is required)
 - **Quarantine is not deletion** — tests with intermittent failures should be
   quarantined (noted in manifest) but not removed; they should be fixed by
   `/test-flakiness`
-- **Ask before writing** — always confirm before creating or updating the manifest
+- **Auto-write** — the manifest is computed; write it without an approval gate,
+  guarded by the append-only integrity check

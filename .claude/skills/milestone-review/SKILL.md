@@ -140,13 +140,10 @@ Do not issue a GO against an OFF TRACK verdict unless the user explicitly select
 
 ## Phase 4: Save Review
 
-Present the review to the user.
-
-Ask: "May I write this to `production/milestones/[milestone-name]-review.md`?"
-
-If yes, write the file, creating the directory if needed. Verdict: **COMPLETE** — milestone review saved.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Present the review to the user, then auto-write it to
+`production/milestones/[milestone-name]-review.md` (metrics-completeness check — the review
+is a derived report from milestone + sprint data). Create the directory if needed. No
+write-approval keystroke needed. Verdict: **COMPLETE** — milestone review saved.
 
 ---
 

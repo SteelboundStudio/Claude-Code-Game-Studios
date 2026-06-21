@@ -30,11 +30,13 @@ FILENAME=$(basename "$FILE_PATH")
 WARNINGS=""   # Style/convention issues -- exit 0 with advisory message
 ERRORS=""     # Build-breaking issues -- exit 1 to block the operation
 
-# ADVISORY: Check naming convention (lowercase with underscores only)
-# Naming issues are style violations -- warn but do not block
+# B6: Check naming convention (lowercase with underscores only)
+# BLOCKING (exit 1) -- non-conforming asset filenames are rejected so the asset
+# pipeline stays consistent. Only runs for files under assets/ (guarded above), so it
+# no-ops on a fresh template with no assets.
 # Uses grep -E (POSIX) not grep -P (Perl) for Windows Git Bash compatibility
 if echo "$FILENAME" | grep -qE '[A-Z[:space:]-]'; then
-    WARNINGS="$WARNINGS\n  NAMING: $FILE_PATH must be lowercase with underscores (got: $FILENAME)"
+    ERRORS="$ERRORS\n  NAMING: $FILE_PATH must be lowercase with underscores, no caps/spaces/dashes (got: $FILENAME)"
 fi
 
 # BLOCKING: Check JSON validity for data files

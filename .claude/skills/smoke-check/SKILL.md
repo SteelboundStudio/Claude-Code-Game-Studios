@@ -182,6 +182,13 @@ Tailor batches 2 and 3 to the actual systems identified from the sprint or QA
 plan. Replace bracketed placeholders with real mechanic names from the current
 sprint's stories.
 
+> **Owner decision — KEEP human observation gate (for now).** These manual smoke
+> batches require a human observing the running game; no e2e/integration harness
+> exists yet to replace them. They stay HITL. **When scripted e2e smoke tests
+> become available, convert these batches into automated tests and remove the
+> human observation gate** — at that point the automated results feed the verdict
+> directly. The automated-test portion (Phase 2) is already auto-blocking.
+
 Use `AskUserQuestion` to batch-verify. Keep to at most 3 calls.
 
 **Batch 1 — Core stability (always run):**
@@ -370,13 +377,17 @@ Any platform with one or more FAIL checks contributes to the overall FAIL verdic
 
 ## Phase 6: Write and Gate
 
-Present the full report in conversation, then ask:
+Present the full report in conversation, then auto-write it to
+`production/qa/smoke-[date].md` — the verdict is computed by the first-match rule
+table in Phase 5 (deterministic from test + batch results), so no approval gate is
+required.
 
-"May I write this smoke check report to `production/qa/smoke-[date].md`?"
+**Replacement check:** the verdict is computed from the rule table and the report
+contains the Automated Tests, Test Coverage, Manual Smoke Checks, and Verdict
+sections before the write is considered complete.
 
-Write only after approval.
-
-After writing, deliver the gate verdict:
+After writing, deliver the gate verdict. The verdict is a **blocking gate**: a
+FAIL programmatically blocks QA hand-off (do not proceed to `/team-qa`).
 
 **If verdict is FAIL:**
 
@@ -417,6 +428,8 @@ agent to begin manual verification."
   gaps for `/story-done` to follow up on.
 - **`quick` argument** skips Phase 3 (coverage scan) and Phase 4 Batch 3.
   Use it for rapid re-checks after fixing a specific failure.
-- Use `AskUserQuestion` for all manual smoke check verification.
-- **Never write the report without asking** — Phase 6 requires explicit
-  approval before any file is created.
+- Use `AskUserQuestion` for all manual smoke check verification — this human
+  observation gate stays until scripted e2e smoke tests replace it.
+- **Auto-write the report** — Phase 6 writes the computed report without an
+  approval gate; the verdict rule table is the replacement check, and a FAIL
+  verdict blocks QA hand-off programmatically.

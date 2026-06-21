@@ -113,13 +113,11 @@ Total rules extracted:
   - Global: [N] naming conventions, [M] forbidden APIs, [P] approved libraries
 ```
 
-Use `AskUserQuestion`:
-- Prompt: "Does this rule summary look complete?"
-- Options:
-  - `[A] Yes — looks good, run the director review and write the manifest`
-  - `[B] Add rules — I have additional rules to include before writing`
-  - `[C] Remove rules — some extracted rules should be dropped`
-  - `[D] Stop here — I need to review the ADRs first`
+The manifest is a mechanical projection of Accepted ADRs + technical preferences +
+engine reference docs (ADR-extraction completeness check — every Accepted ADR's
+mandated/forbidden/guardrail rules are captured). Present the summary, then proceed
+automatically to the director review and write — no "does this look complete?" approval
+gate. (The director gate in Phase 4b is the substantive check on extraction accuracy.)
 
 ---
 
@@ -140,21 +138,23 @@ The technical-director reviews whether:
 - No rules were added that lack a source ADR or preference document
 - Performance guardrails are consistent with the ADR constraints
 
-Apply the verdict:
+Apply the verdict (rule-source-traceability check):
 - **APPROVE** → proceed to Phase 5
-- **CONCERNS** → surface via `AskUserQuestion` with options: `Revise flagged rules` / `Accept and proceed` / `Discuss further`
+- **CONCERNS** → if the concerns are about extraction completeness/accuracy and every rule
+  traces to a source (objective extraction is complete), auto-accept and proceed to Phase 5,
+  noting the concerns inline. Only surface via `AskUserQuestion` (`Revise flagged rules` /
+  `Accept and proceed` / `Discuss further`) when the director flags a genuine rule conflict
+  (two sources mandate contradictory rules) — that needs a human resolution.
 - **REJECT** → do not write the manifest; fix the flagged rules and re-present the summary
 
 ---
 
 ## 5. Write the Control Manifest
 
-Use `AskUserQuestion`:
-- Prompt: "May I write the Control Manifest?"
-- Options:
-  - `[A] Yes — write to docs/architecture/control-manifest.md`
-  - `[B] Show me the full draft first, then ask again`
-  - `[C] Not yet — I want to make more changes`
+Auto-write the derived manifest to `docs/architecture/control-manifest.md` (schema check:
+per-system rule coverage — every layer's required/forbidden/guardrail sections present).
+The manifest is a mechanical projection of the sources, so the write is automatic; no
+write-approval keystroke needed.
 
 Format:
 
@@ -281,7 +281,9 @@ After writing the manifest:
 
 1. **Load silently** — read all inputs before presenting anything
 2. **Show the summary first** — let the user see the scope before writing
-3. **Ask before writing** — always confirm before creating or overwriting the manifest. On write: Verdict: **COMPLETE** — control manifest written. On decline: Verdict: **BLOCKED** — user declined write.
+3. **Auto-write the derived manifest** — the manifest is a mechanical projection of
+   Accepted ADRs + preferences + engine docs (schema check: per-system rule coverage);
+   write it automatically after the director gate. Verdict: **COMPLETE** — control manifest written.
 4. **Source every rule** — never add a rule that doesn't trace to an ADR, a
    technical preference, or an engine reference doc
 5. **No interpretation** — extract rules as stated in ADRs; do not paraphrase

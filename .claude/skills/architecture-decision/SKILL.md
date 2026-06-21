@@ -45,8 +45,11 @@ Enter **retrofit mode**:
    ```
 4. Ask: "Shall I add the [N] missing sections? I will not modify any existing content."
 5. If yes:
-   - For **Status**: ask the user — "What is the current status of this decision?"
-     Options: "Proposed", "Accepted", "Deprecated", "Superseded by ADR-XXXX"
+   - For **Status**: infer the status automatically (status-enum schema validation) —
+     do not ask. Default to `Proposed`; if the file location or header indicates the
+     decision is already in force (e.g. it lives in an Accepted-ADRs path or references
+     implemented code), use `Accepted`. The value must be one of the valid enum members:
+     `Proposed`, `Accepted`, `Deprecated`, `Superseded by ADR-XXXX`.
    - For **ADR Dependencies**: ask — "Does this decision depend on any other ADR?
      Does it enable or block any other ADR or epic?" Accept "None" for each field.
    - For **Engine Compatibility**: read the engine reference docs (same as Step 1 below)
@@ -342,7 +345,7 @@ to implement it.]
      1. Confirm the proposed approach is idiomatic for the pinned engine version
      2. Flag any APIs or patterns that are deprecated or changed post-training-cutoff
      3. Identify engine-specific risks or gotchas not captured in the current ADR draft
-   - If the specialist identifies a **blocking issue** (wrong API, deprecated approach, engine version incompatibility): revise the Decision and Engine Compatibility sections accordingly, then confirm the changes with the user before proceeding
+   - If the specialist identifies a **blocking issue** (wrong API, deprecated approach, engine version incompatibility): auto-apply the specialist's API/version corrections to the Decision and Engine Compatibility sections (engine-reference version-compat check). Only pause to confirm with the user when the correction changes the *decision itself* (a different approach is now recommended) — not for mechanical API/version fixes
    - If the specialist finds **minor notes** only: incorporate them into the ADR's Risks subsection
 
 **Review mode check** — apply before spawning TD-ADR:
@@ -413,14 +416,12 @@ Registry candidates from this ADR:
 3. Append the new entry AFTER the last existing entry in that section — do not try to replace a `[]` placeholder that may no longer exist
 4. If the section has entries already, use the closing content of the last entry as the `old_string` anchor, and append the new entry after it
 
-**BLOCKING — do not write to `docs/registry/architecture.yaml` without explicit user approval.**
-
-Ask using `AskUserQuestion`:
-- "May I update `docs/registry/architecture.yaml` with these [N] new stances?"
-  - Options: "Yes — update the registry", "Not yet — I want to review the candidates", "Skip registry update"
-
-Only proceed if the user selects yes. If yes: append new entries. Never modify existing entries — if a stance is
+Auto-append the new stances to `docs/registry/architecture.yaml` — the registry is a
+derived index (registry-schema validation + append-only invariant check). No write
+approval needed. Append new entries only; never modify existing entries — if a stance is
 changing, set the old entry to `status: superseded_by: ADR-[NNNN]` and add the new entry.
+The append-only invariant is the guard: a write that would alter or delete an existing
+entry must be blocked.
 
 ---
 

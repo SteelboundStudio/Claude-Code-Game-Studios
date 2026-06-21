@@ -346,9 +346,12 @@ Context  ->  Questions  ->  Options  ->  Decision  ->  Draft  ->  Approval  ->  
 8. **Registry conflict check** (Sections C and D only — Detailed Design and Formulas):
    After writing, scan the section content for entity names, item names, formula
    names, and numeric constants that appear in the registry. For each match:
-   - Compare the value just written against the registry entry.
+   - Compare the value just written against the registry entry. **Detection is
+     automatic** (consistency-check numeric cross-ref) — the conflict is found and
+     surfaced without a human turn.
    - If they differ: **surface the conflict immediately** before starting the next
-     section. Do not continue silently.
+     section. Do not continue silently. **The resolution stays human** — which value
+     wins is a design decision:
      > "Registry conflict: [name] is registered in [source GDD] as [registry_value].
      > This section just wrote [new_value]. Which is correct?"
    - If new (not in registry): flag it as a candidate for registry registration

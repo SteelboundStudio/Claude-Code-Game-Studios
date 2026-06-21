@@ -175,17 +175,18 @@ For each flaky test:
 
 ## 7. Update Regression Suite + Optional Report File
 
-Ask: "May I update the quarantine section of `tests/regression-suite.md`
-with the flaky tests found?"
+Auto-update the quarantine section of `tests/regression-suite.md` with the flaky
+tests found — flakiness is computed from pass/fail history against fixed thresholds,
+so no approval gate is required. Use `Edit` to append entries to the Quarantined
+Tests table; never remove existing quarantine entries — only add new ones.
 
-If yes: use `Edit` to append entries to the Quarantined Tests table.
-Never remove existing quarantine entries — only add new ones.
+Auto-write the full flakiness report to
+`production/qa/flakiness-report-[date].md` (per-test analysis with cause details
+and engine-specific fix snippets).
 
-Ask (separately): "May I write a full flakiness report to
-`production/qa/flakiness-report-[date].md`?"
-
-The full report includes per-test analysis with cause details and
-engine-specific fix snippets.
+**Replacement check:** flakiness thresholds (>25% → quarantine, etc.) are
+deterministic; quarantine is append-only and never deletes tests; findings from
+fewer than 3 runs are marked "suspected" not "confirmed".
 
 After writing:
 
@@ -205,7 +206,8 @@ After writing:
   "suspected" not "confirmed"; ask if more run data is available
 - **Fix is always the goal** — quarantine is temporary; surface the fix
   direction even when recommending quarantine
-- **Ask before writing** — both the regression-suite update and the report
-  file require explicit approval. On write: Verdict: **COMPLETE** — flakiness report written. On decline: Verdict: **BLOCKED** — user declined write.
+- **Auto-write** — both the regression-suite quarantine update and the report file
+  are computed from logs; write them without an approval gate (append-only
+  quarantine, never deletes tests). Verdict: **COMPLETE** — flakiness report written.
 - **Flakiness in CI is a team problem** — surface the list and recommended
   actions clearly; do not just silently quarantine without the team knowing

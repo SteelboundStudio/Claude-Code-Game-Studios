@@ -362,11 +362,15 @@ System helpers ([mode]):
 - tests/helpers/[system]_factory.[ext]  ← from [system] GDD
 ```
 
-Ask: "May I write these helper files to `tests/helpers/`?"
+Auto-write these helper files to `tests/helpers/` — they are deterministic codegen
+from the engine, language, and GDD bounds, so no approval gate is required.
 
-**Never overwrite existing files.** If a file already exists, report:
+**Never overwrite existing files** (no-overwrite guard). If a file already exists, report:
 "Skipping `[path]` — already exists. Remove the file manually if you want it
 regenerated."
+
+**Replacement check:** no-overwrite guard enforced; helper bounds trace to GDD
+Formulas sections, not invented values.
 
 After writing: Verdict: **COMPLETE** — helper files created.
 
@@ -386,7 +390,8 @@ After writing: Verdict: **COMPLETE** — helper files created.
   the code exists
 - **Helpers should reflect the GDD** — bounds and constants in helpers should
   trace to GDD Formulas sections, not invented values
-- **Ask before writing** — always confirm before creating files in `tests/`
+- **Auto-write** — helper codegen is deterministic; write without an approval gate,
+  guarded by the no-overwrite rule
 
 ## Next Steps
 

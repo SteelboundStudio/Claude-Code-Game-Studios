@@ -79,11 +79,9 @@ Read recent changes (git log if available) to understand current momentum.
 
 ## Phase 4: Save Document
 
-Present the onboarding document to the user.
-
-Ask: "May I write this to `production/onboarding/onboard-[role]-[date].md`?"
-
-If yes, write the file, creating the directory if needed.
+Present the onboarding document to the user, then auto-write it to
+`production/onboarding/onboard-[role]-[date].md` (template schema check — the doc is
+derived from project context). Create the directory if needed. No write-approval keystroke needed.
 
 ---
 

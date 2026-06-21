@@ -69,9 +69,10 @@ Report all findings with file paths and line numbers. This mode is read-only —
 
 Output a diff of new strings to add to the string table.
 
-Present the diff to the user. Ask: "May I write these new entries to `assets/data/strings/strings-en.json`?"
-
-If yes, write only the diff (new entries), not a full replacement. Verdict: **COMPLETE** — strings extracted and written.
+Present the diff to the user, then auto-write the new entries to
+`assets/data/strings/strings-en.json` (per-doc schema check — the entries are derived from
+the source scan; the write is mechanical). Write only the diff (new entries), never a full
+replacement (append-only guard). No write-approval keystroke needed. Verdict: **COMPLETE** — strings extracted and written.
 
 ---
 
@@ -174,7 +175,9 @@ Direct questions to: [placeholder for user/team contact]
 Delivery format: JSON, same schema as strings-en.json
 ```
 
-Ask: "May I write this translator brief to `production/localization/translator-brief-[locale]-[date].md`?"
+Auto-write the translator brief to `production/localization/translator-brief-[locale]-[date].md`
+(per-doc schema check — the brief is derived from the GDDs, string table, and narrative
+docs). No write-approval keystroke needed.
 
 ---
 
@@ -217,7 +220,8 @@ Present findings as a table:
 
 BLOCKING = must fix before shipping that locale. ADVISORY = recommend change. NOTE = informational only.
 
-Ask: "May I write this cultural review report to `production/localization/cultural-review-[date].md`?"
+Auto-write the cultural review report to `production/localization/cultural-review-[date].md`
+(per-doc schema check — the report is the derived findings table). No write-approval keystroke needed.
 
 ---
 
@@ -257,7 +261,9 @@ Generate a recording script document for each character, grouped by scene. Inclu
 - Emotion/direction note for each line (`[Warm, welcoming]`, `[Annoyed, clipped]`)
 - Any lines that are responses in a conversation (provide context: "Player just said X")
 
-Ask: "May I write the VO recording scripts to `production/localization/vo-scripts-[locale]-[date].md`?"
+Auto-write the VO recording scripts to `production/localization/vo-scripts-[locale]-[date].md`
+(per-doc schema check — the scripts are derived from the dialogue strings and narrative docs).
+No write-approval keystroke needed.
 
 ### VO Pipeline: Validate
 
@@ -304,7 +310,8 @@ Grep patterns to check:
 
 Report findings. Flag BLOCKING issues (content unreadable without fix) vs ADVISORY (cosmetic improvements).
 
-Ask: "May I write this RTL check report to `production/localization/rtl-check-[date].md`?"
+Auto-write the RTL check report to `production/localization/rtl-check-[date].md`
+(per-doc schema check — the report is the derived findings). No write-approval keystroke needed.
 
 ---
 
@@ -356,8 +363,15 @@ If argument includes `lift`: update `freeze-status.md` Status to `LIFTED`, recor
 
 ### freeze check (auto-integrated into extract)
 
-When `extract` mode finds new or modified strings and `freeze-status.md` shows Status: ACTIVE — append the new keys to `## Post-Freeze Changes` and warn:
-> "⚠️ String freeze is active. [N] new/modified strings have been added. These are freeze violations. Notify your localization vendor before proceeding."
+When `extract` mode finds new or modified strings and `freeze-status.md` shows Status: ACTIVE —
+auto-detect and **block** the violation (freeze-diff check — this is a blocking gate, not
+advisory). Append the new keys to `## Post-Freeze Changes` and emit:
+> "⚠️ BLOCKED: String freeze is active. [N] new/modified strings are freeze violations.
+> These require either re-translation or an approved freeze lift before proceeding. Notify
+> your localization vendor."
+
+The freeze-lift decision stays human (see `freeze lift` above) — lifting a freeze is a
+coordination call with cost (re-translation), not a mechanical action.
 
 ---
 
@@ -405,7 +419,12 @@ Output a QA verdict per locale:
 [ ] Producer approves shipping [Locale]
 ```
 
-Ask: "May I write this localization QA report to `production/localization/loc-qa-[locale]-[date].md`?"
+Auto-compute the coverage verdict (coverage% + completeness check — PASS / PASS WITH
+CONDITIONS / FAIL is objective from coverage and BLOCKING-findings counts) and auto-write
+the report to `production/localization/loc-qa-[locale]-[date].md`. No write-approval keystroke
+needed. **The producer ship sign-off stays human** — the `[ ] Producer approves shipping
+[Locale]` checkbox is a ship decision the producer makes; the skill computes the coverage
+verdict but does not check that box.
 
 **Gate integration**: The Polish → Release gate requires a PASS or PASS WITH CONDITIONS verdict for every locale being shipped. A FAIL blocks release for that locale only — other locales may still proceed if their QA passes.
 

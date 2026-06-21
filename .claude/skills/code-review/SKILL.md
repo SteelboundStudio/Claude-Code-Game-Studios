@@ -160,8 +160,16 @@ Collect all specialist findings before producing output.
 ### Suggestions
 [Nice-to-have improvements]
 
-### Verdict: [APPROVED / APPROVED WITH SUGGESTIONS / CHANGES REQUIRED]
+### Verdict: [APPROVED / APPROVED WITH SUGGESTIONS / CHANGES REQUIRED / MAJOR REVISION]
 ```
+
+**Objective violations are auto-flagged as blocking findings** (lint + arch-pattern +
+coding-standards checks): coding-standard failures (Phase 4), SOLID violations (Phase 5),
+architectural-pattern violations / ARCHITECTURAL VIOLATIONs (Phase 3/5), hardcoded
+gameplay values, and deprecated-API usage (engine specialist) are computed and emitted
+as `CHANGES REQUIRED` blocking items — no human turn needed to decide they are violations.
+Reserve human judgment only for the design-intent `MAJOR REVISION` call (whether the
+overall approach is wrong), which is not objectively decidable.
 
 This skill is read-only — no files are written.
 
@@ -169,16 +177,14 @@ This skill is read-only — no files are written.
 
 ## Phase 9: Next Steps
 
-Use `AskUserQuestion`:
-- Prompt: "Code review complete — verdict: [APPROVED / CHANGES REQUIRED / MAJOR REVISION]. How would you like to proceed?"
-- Options (adjust based on verdict):
-  - If APPROVED:
-    - `[A] Run /story-done to mark the story complete`
-    - `[B] Stop here`
-  - If CHANGES REQUIRED or MAJOR REVISION:
-    - `[A] Fix the issues and re-run /code-review`
-    - `[B] Run /story-done anyway with noted exceptions`
-    - `[C] Stop here`
+Auto-route by verdict (routing — no human turn needed for the objective verdicts):
+- **APPROVED / APPROVED WITH SUGGESTIONS** → recommend `/story-done` to mark the story complete.
+- **CHANGES REQUIRED** → recommend fixing the auto-flagged blocking findings, then re-running `/code-review`.
+- **MAJOR REVISION** → this is the design-intent judgment call; surface it with `AskUserQuestion`
+  and let the user decide:
+  - `[A] Rework the approach and re-run /code-review`
+  - `[B] Run /story-done anyway with noted exceptions`
+  - `[C] Stop here`
 
 If an ARCHITECTURAL VIOLATION is found:
 - If the violation contradicts an **existing ADR**: fix the implementation to comply with `docs/architecture/[adr-file].md`. If the design has legitimately changed, run `/architecture-decision` to formally *revise* the existing ADR — do not create a competing one.
